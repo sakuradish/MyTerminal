@@ -15,20 +15,35 @@ class MemoFrame(tk.Frame):
         x_sb = tk.Scrollbar(self,orient='horizontal')
         y_sb = tk.Scrollbar(self,orient='vertical')
 
-        label1 = tk.Label(self, text='メインタスク')
-        fruits = ['Apple', 'Banana', 'Grape']
+        with open('../data/new.txt','r') as f:
+            fruits = list()
+            lines = f.readlines()
+            for line in lines:
+                if not line.split("\t")[3] in fruits:
+                    fruits.append(line.split("\t")[3])
+        label1 = tk.Label(self, text='プロジェクト')
         v1 = tk.StringVar()
         cb1 = ttk.Combobox(
             self, textvariable=v1,
             values=fruits)
-        label2 = tk.Label(self, text='サブタスク')
-        fruits = ['Apple', 'Banana', 'Grape']
+        with open('../data/new.txt','r') as f:
+            fruits = list()
+            lines = f.readlines()
+            for line in lines:
+                if not line.split("\t")[4] in fruits:
+                    fruits.append(line.split("\t")[4])
+        label2 = tk.Label(self, text='タスク')
         v2 = tk.StringVar()
         cb2 = ttk.Combobox(
             self, textvariable=v2,
             values=fruits)
+        with open('../data/new.txt','r') as f:
+            fruits = list()
+            lines = f.readlines()
+            for line in lines:
+                if not line.split("\t")[5] in fruits:
+                    fruits.append(line.split("\t")[5])
         label3 = tk.Label(self, text='メモ')
-        fruits = ['Apple', 'Banana', 'Grape']
         v3 = tk.StringVar()
         cb3 = ttk.Combobox(
             self, textvariable=v3,
@@ -66,7 +81,6 @@ class MemoFrame(tk.Frame):
         self.text.delete('1.0','end')
         for line in lines:
             self.text.insert('end',line)
-        print(self.text.get('1.0','end'))
 
 # ウィンドウ作成
 root = tk.Tk()
@@ -80,7 +94,7 @@ isKeyEventProcessing = False
 def OnKeyEvent(event):
     global isKeyEventProcessing
     if isKeyEventProcessing == False:
-        if event.keysym == 'Return' and memoframe.text != root.focus_get():
+        if event.keysym == 'Return' and memoframe.text != root.focus_get() and memoframe.cb3.get() != "":
             isKeyEventProcessing = True
             print(event)
             with open("../data/new.txt", "w") as f:
@@ -96,12 +110,14 @@ def OnKeyEvent(event):
                 root.update()
                 memoframe.text.insert('end',line)
                 memoframe.text.see('end')
+            memoframe.cb3.set("")
             isKeyEventProcessing = False
 def OnMouseEvent(event):
     print(event)
 
 root.bind("<Key>", OnKeyEvent)
 root.bind("<Button>", OnMouseEvent)
+memoframe.cb1.set("aaaaaaaa")
 
 # メインループ
 root.mainloop()
