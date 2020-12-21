@@ -22,10 +22,11 @@ class MemoFrame(tk.Frame):
                 if not line.split("\t")[3] in fruits:
                     fruits.append(line.split("\t")[3])
         label1 = tk.Label(self, text='プロジェクト')
-        v1 = tk.StringVar()
+        self.v1 = tk.StringVar()
         cb1 = ttk.Combobox(
-            self, textvariable=v1,
+            self, textvariable=self.v1,
             values=fruits)
+        cb1.set(fruits[-1])
         with open('../data/new.txt','r') as f:
             fruits = list()
             lines = f.readlines()
@@ -33,10 +34,11 @@ class MemoFrame(tk.Frame):
                 if not line.split("\t")[4] in fruits:
                     fruits.append(line.split("\t")[4])
         label2 = tk.Label(self, text='タスク')
-        v2 = tk.StringVar()
+        self.v2 = tk.StringVar()
         cb2 = ttk.Combobox(
-            self, textvariable=v2,
+            self, textvariable=self.v2,
             values=fruits)
+        cb2.set(fruits[-1])
         with open('../data/new.txt','r') as f:
             fruits = list()
             lines = f.readlines()
@@ -44,9 +46,9 @@ class MemoFrame(tk.Frame):
                 if not line.split("\t")[5] in fruits:
                     fruits.append(line.split("\t")[5])
         label3 = tk.Label(self, text='メモ')
-        v3 = tk.StringVar()
+        self.v3 = tk.StringVar()
         cb3 = ttk.Combobox(
-            self, textvariable=v3,
+            self, textvariable=self.v3,
             values=fruits)
 
         x_sb.config(command=text.xview)
@@ -117,7 +119,6 @@ def OnMouseEvent(event):
 
 root.bind("<Key>", OnKeyEvent)
 root.bind("<Button>", OnMouseEvent)
-memoframe.cb1.set("aaaaaaaa")
 
 # メインループ
 root.mainloop()
