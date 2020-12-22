@@ -110,13 +110,13 @@ class InBoxFrame(tk.Frame):
 
                 # 新規タスクを追加
                 todo = tk.Label(self, textvariable=task)
-                todo.place(rely=self.num*0.05+0.1, relx=0, relwidth=0.6)
+                todo.place(rely=self.num*0.03+0.1, relx=0, relwidth=0.6)
                 self.todolist.append(todo)
 
                 # 新規タスクの削除ボタンを追加
                 button = tk.Button(self, text="DONE "+ str(self.num), highlightbackground='gray')
                 button.bind("<Button-1>", self.delete_value)
-                button.place(rely=self.num*0.05+0.1, relx=0.6, relwidth=0.2)
+                button.place(rely=self.num*0.03+0.1, relx=0.6, relwidth=0.2)
                 self.buttonlist.append(button)
 
                 self.num += 1
