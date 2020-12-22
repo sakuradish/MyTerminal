@@ -88,7 +88,7 @@ class InBoxFrame(tk.Frame):
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
         self.master.title('Todo List')
-        self.num = 0
+        self.num = 1
         self.todolist = []
         self.buttonlist = []
         self.v1 = tk.StringVar()
@@ -109,19 +109,33 @@ class InBoxFrame(tk.Frame):
                 task.set(line)
 
                 # 新規タスクを追加
-                todo = tk.Label(self, width=30, textvariable=task)
-                todo.place(rely=self.num*0.05+0.1, relx=0)
+                todo = tk.Label(self, textvariable=task)
+                todo.place(rely=self.num*0.05+0.1, relx=0, relwidth=0.6)
                 self.todolist.append(todo)
 
                 # 新規タスクの削除ボタンを追加
-                button = tk.Button(self, width=10, text="DONE "+ str(self.num), highlightbackground='gray')
-                # button.bind("<Button-1>", self.delete_value)
-                button.place(rely=self.num*0.05+0.1, relx=0.5)
+                button = tk.Button(self, text="DONE "+ str(self.num), highlightbackground='gray')
+                button.bind("<Button-1>", self.delete_value)
+                button.place(rely=self.num*0.05+0.1, relx=0.6, relwidth=0.2)
                 self.buttonlist.append(button)
 
                 self.num += 1
+    def delete_value(self, event):
+        deletenum = int(event.widget["text"].split(" ")[1])
+        index = deletenum-1
+        with open('../data/todo.txt','r') as f:
+            lines = f.readlines()
+        with open('../data/todo.txt','w') as f:
+            for line in lines:
+                #同じtodo無い前提いまのところ
+                if line == lines[index]:
+                    with open('../data/done.txt','a') as o:
+                        o.write(line)
+                else:
+                    f.write(line)
+        self.initializeToDoList()
     def initializeToDoList(self):
-        self.num = 0
+        self.num = 1
         for todo in self.todolist:
             todo.place_forget()
         for button in self.buttonlist:
@@ -167,6 +181,7 @@ def OnKeyEvent(event):
             with open("../data/todo.txt", "a") as f:
                 f.write(inboxframe.cb.get() + "\n")
             inboxframe.initializeToDoList()
+            inboxframe.cb.set("")
             isKeyEventProcessing = False
 def OnMouseEvent(event):
     print(event)
