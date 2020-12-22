@@ -84,6 +84,50 @@ class MemoFrame(tk.Frame):
         for line in lines:
             self.text.insert('end',line)
 
+class InBoxFrame(tk.Frame):
+    def __init__(self, master=None):
+        tk.Frame.__init__(self, master)
+        self.master.title('Todo List')
+        self.num = 0
+        self.todolist = []
+        self.buttonlist = []
+        self.v1 = tk.StringVar()
+        fruits = []
+        cb = ttk.Combobox(
+            self, textvariable=self.v1,
+            values=fruits)
+        self.cb = cb
+        cb.place(relx=0,rely=0,relwidth=1,relheight=0.1)
+        self.initializeToDoList()
+
+    def drawToDoList(self):
+        with open('../data/todo.txt','r') as f:
+            lines = f.readlines()
+            for line in lines:
+                # テキストボックスの値を取得
+                task = tk.StringVar()
+                task.set(line)
+
+                # 新規タスクを追加
+                todo = tk.Label(self, width=30, textvariable=task)
+                todo.place(rely=self.num*0.05+0.1, relx=0)
+                self.todolist.append(todo)
+
+                # 新規タスクの削除ボタンを追加
+                button = tk.Button(self, width=10, text="DONE "+ str(self.num), highlightbackground='gray')
+                # button.bind("<Button-1>", self.delete_value)
+                button.place(rely=self.num*0.05+0.1, relx=0.5)
+                self.buttonlist.append(button)
+
+                self.num += 1
+    def initializeToDoList(self):
+        self.num = 0
+        for todo in self.todolist:
+            todo.place_forget()
+        for button in self.buttonlist:
+            button.place_forget()
+        self.drawToDoList()
+
 # ウィンドウ作成
 root = tk.Tk()
 root.title("MyTerminal")
@@ -92,11 +136,14 @@ root.state("zoomed")
 
 memoframe = MemoFrame(root)
 memoframe.place(relx=0,rely=0,relwidth=0.5,relheight=1)
+inboxframe = InBoxFrame(root)
+inboxframe.place(relx=0.5,rely=0,relwidth=0.5,relheight=1)
+
 isKeyEventProcessing = False
 def OnKeyEvent(event):
     global isKeyEventProcessing
     if isKeyEventProcessing == False:
-        if event.keysym == 'Return' and memoframe.text != root.focus_get() and memoframe.cb3.get() != "":
+        if event.keysym == 'Return' and memoframe.cb3 == root.focus_get() and memoframe.cb3.get() != "":
             isKeyEventProcessing = True
             print(event)
             with open("../data/new.txt", "w") as f:
@@ -113,6 +160,13 @@ def OnKeyEvent(event):
                 memoframe.text.insert('end',line)
                 memoframe.text.see('end')
             memoframe.cb3.set("")
+            isKeyEventProcessing = False
+        elif event.keysym == 'Return' and inboxframe.cb == root.focus_get() and inboxframe.cb.get() != "":
+            isKeyEventProcessing = True
+            print(event)
+            with open("../data/todo.txt", "a") as f:
+                f.write(inboxframe.cb.get() + "\n")
+            inboxframe.initializeToDoList()
             isKeyEventProcessing = False
 def OnMouseEvent(event):
     print(event)
