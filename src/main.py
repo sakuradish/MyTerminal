@@ -142,17 +142,6 @@ class InBoxFrame(tk.Frame):
             button.place_forget()
         self.drawToDoList()
 
-# ウィンドウ作成
-root = tk.Tk()
-root.title("MyTerminal")
-root.minsize(root.winfo_screenwidth(), root.winfo_screenheight())
-root.state("zoomed")
-
-memoframe = MemoFrame(root)
-memoframe.place(relx=0,rely=0,relwidth=0.5,relheight=1)
-inboxframe = InBoxFrame(root)
-inboxframe.place(relx=0.5,rely=0,relwidth=0.5,relheight=1)
-
 isKeyEventProcessing = False
 def OnKeyEvent(event):
     global isKeyEventProcessing
@@ -186,8 +175,38 @@ def OnKeyEvent(event):
 def OnMouseEvent(event):
     print(event)
 
-root.bind("<Key>", OnKeyEvent)
-root.bind("<Button>", OnMouseEvent)
+def show_left(event):
+    memoframe.place_forget()
+    inboxframe.place_forget()
+    for i in range(1,101,1):
+        memoframe.place(relx=0,rely=0.1,relwidth=0.5+i/200,relheight=0.9)
+        inboxframe.place(relx=0.5+i/200,rely=0.1,relwidth=0.5-i/200,relheight=0.9)
+        root.update()
+def show_both(event):
+    memoframe.place_forget()
+    inboxframe.place_forget()
+    memoframe.place(relx=0,rely=0.1,relwidth=0.5,relheight=0.9)
+    inboxframe.place(relx=0.5,rely=0.1,relwidth=0.5,relheight=0.9)
 
-# メインループ
-root.mainloop()
+if __name__ == '__main__':
+    # ウィンドウ作成
+    root = tk.Tk()
+    root.title("MyTerminal")
+    root.minsize(root.winfo_screenwidth(), root.winfo_screenheight())
+    root.state("zoomed")
+    button1 = tk.Button(root, text="LEFT", highlightbackground='gray')
+    button1.bind("<Button-1>", show_left)
+    button1.place(relwidth=0.2)
+    button1 = tk.Button(root, text="BOTH", highlightbackground='gray')
+    button1.bind("<Button-1>", show_both)
+    button1.place(relx=0.2,relwidth=0.2)
+
+    memoframe = MemoFrame(root)
+    memoframe.place(relx=0,rely=0.1,relwidth=0.5,relheight=0.9)
+    inboxframe = InBoxFrame(root)
+    inboxframe.place(relx=0.5,rely=0.1,relwidth=0.5,relheight=0.9)
+    root.bind("<Key>", OnKeyEvent)
+    root.bind("<Button>", OnMouseEvent)
+
+    # メインループ
+    root.mainloop()
