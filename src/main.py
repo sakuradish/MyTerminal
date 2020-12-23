@@ -116,6 +116,7 @@ class InBoxFrame(tk.Frame):
                 # 新規タスクの削除ボタンを追加
                 button = tk.Button(self, text="DONE "+ str(self.num), highlightbackground='gray')
                 button.bind("<Button-1>", self.delete_value)
+                button.bind("<Return>", self.delete_value)
                 button.place(rely=self.num*0.03+0.1, relx=0.6, relwidth=0.2)
                 self.buttonlist.append(button)
 
@@ -200,10 +201,12 @@ if __name__ == '__main__':
     root.state("zoomed")
     button1 = tk.Button(root, text="LEFT", highlightbackground='gray')
     button1.bind("<Button-1>", show_left)
+    button1.bind("<Return>", show_left)
     button1.place(relwidth=0.2)
-    button1 = tk.Button(root, text="BOTH", highlightbackground='gray')
-    button1.bind("<Button-1>", show_both)
-    button1.place(relx=0.2,relwidth=0.2)
+    button2 = tk.Button(root, text="BOTH", highlightbackground='gray')
+    button2.bind("<Button-1>", show_both)
+    button2.bind("<Return>", show_both)
+    button2.place(relx=0.2,relwidth=0.2)
 
     memoframe = MemoFrame(root)
     memoframe.place(relx=0,rely=0.1,relwidth=0.5,relheight=0.9)
