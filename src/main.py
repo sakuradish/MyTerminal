@@ -130,6 +130,7 @@ class InBoxFrame(tk.Frame):
                 #同じtodo無い前提いまのところ
                 if line == lines[index]:
                     with open('../data/done.txt','a') as o:
+                        update_memo("DONE : "+line)
                         o.write(line)
                 else:
                     f.write(line)
@@ -142,31 +143,34 @@ class InBoxFrame(tk.Frame):
             button.place_forget()
         self.drawToDoList()
 
+def update_memo(argtext):
+    with open("../data/new.txt", "w") as f:
+        f.write(memoframe.text.get('1.0','end'))
+        dt = datetime.datetime.now()
+        date = dt.strftime("%Y/%m/%d") + "\t" + dt.strftime('%a') + "\t" + dt.strftime('%X')
+        f.write(date + "\t" + memoframe.cb1.get() + "\t" + memoframe.cb2.get() + "\t" + argtext)
+    f = open('../data/new.txt','r')
+    lines = f.readlines()
+    f.close()
+    memoframe.text.delete('1.0','end')
+    for line in lines:
+        root.update()
+        memoframe.text.insert('end',line)
+        memoframe.text.see('end')
+
 isKeyEventProcessing = False
 def OnKeyEvent(event):
     global isKeyEventProcessing
     if isKeyEventProcessing == False:
         if event.keysym == 'Return' and memoframe.cb3 == root.focus_get() and memoframe.cb3.get() != "":
             isKeyEventProcessing = True
-            print(event)
-            with open("../data/new.txt", "w") as f:
-                f.write(memoframe.text.get('1.0','end'))
-                dt = datetime.datetime.now()
-                date = dt.strftime("%Y/%m/%d") + "\t" + dt.strftime('%a') + "\t" + dt.strftime('%X')
-                f.write(date + "\t" + memoframe.cb1.get() + "\t" + memoframe.cb2.get() + "\t" + memoframe.cb3.get())
-            f = open('../data/new.txt','r')
-            lines = f.readlines()
-            f.close()
-            memoframe.text.delete('1.0','end')
-            for line in lines:
-                root.update()
-                memoframe.text.insert('end',line)
-                memoframe.text.see('end')
+            update_memo(memoframe.cb3.get())
             memoframe.cb3.set("")
             isKeyEventProcessing = False
         elif event.keysym == 'Return' and inboxframe.cb == root.focus_get() and inboxframe.cb.get() != "":
             isKeyEventProcessing = True
             print(event)
+            update_memo("TODO : "+inboxframe.cb.get())
             with open("../data/todo.txt", "a") as f:
                 f.write(inboxframe.cb.get() + "\n")
             inboxframe.initializeToDoList()
