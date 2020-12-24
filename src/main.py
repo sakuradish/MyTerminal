@@ -158,10 +158,10 @@ def update_memo(argtext):
     f.close()
     memoframe.text.delete('1.0','end')
     for line in lines:
-        if line != "\n"
-        root.update()
-        memoframe.text.insert('end',line)
-        memoframe.text.see('end')
+        if line != "\n":
+            root.update()
+            memoframe.text.insert('end',line)
+            memoframe.text.see('end')
 
 isKeyEventProcessing = False
 def OnKeyEvent(event):
