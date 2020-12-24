@@ -197,6 +197,10 @@ def show_both(event):
     memoframe.place(relx=0,rely=0.1,relwidth=0.5,relheight=0.9)
     inboxframe.place(relx=0.5,rely=0.1,relwidth=0.5,relheight=0.9)
 
+def show_time():
+    print(datetime.datetime(2021, 5, 5, 10,10,10) - datetime.datetime.now())
+    root.after(1000,show_time)
+
 if __name__ == '__main__':
     # ウィンドウ作成
     root = tk.Tk()
@@ -219,5 +223,6 @@ if __name__ == '__main__':
     root.bind("<Key>", OnKeyEvent)
     root.bind("<Button>", OnMouseEvent)
 
+    show_time()
     # メインループ
     root.mainloop()
