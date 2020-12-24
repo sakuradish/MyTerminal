@@ -19,7 +19,7 @@ class MemoFrame(tk.Frame):
             fruits = list()
             lines = f.readlines()
             for line in lines:
-                if not line.split("\t")[3] in fruits:
+                if line != "\n" and not line.split("\t")[3] in fruits:
                     fruits.append(line.split("\t")[3])
         label1 = tk.Label(self, text='プロジェクト')
         self.v1 = tk.StringVar()
@@ -31,7 +31,7 @@ class MemoFrame(tk.Frame):
             fruits = list()
             lines = f.readlines()
             for line in lines:
-                if not line.split("\t")[4] in fruits:
+                if line != "\n" and not line.split("\t")[4] in fruits:
                     fruits.append(line.split("\t")[4])
         label2 = tk.Label(self, text='タスク')
         self.v2 = tk.StringVar()
@@ -43,7 +43,7 @@ class MemoFrame(tk.Frame):
             fruits = list()
             lines = f.readlines()
             for line in lines:
-                if not line.split("\t")[5] in fruits:
+                if line != "\n" and not line.split("\t")[5] in fruits:
                     fruits.append(line.split("\t")[5])
         label3 = tk.Label(self, text='メモ')
         self.v3 = tk.StringVar()
@@ -142,11 +142,14 @@ class InBoxFrame(tk.Frame):
             todo.place_forget()
         for button in self.buttonlist:
             button.place_forget()
+        self.todolist = []
+        self.buttonlist = []
         self.drawToDoList()
 
 def update_memo(argtext):
+    argtext = argtext.replace("\n","")
     with open("../data/new.txt", "w") as f:
-        f.write(memoframe.text.get('1.0','end'))
+        f.write(memoframe.text.get('1.0','end').replace("\n\n","\n"))
         dt = datetime.datetime.now()
         date = dt.strftime("%Y/%m/%d") + "\t" + dt.strftime('%a') + "\t" + dt.strftime('%X')
         f.write(date + "\t" + memoframe.cb1.get() + "\t" + memoframe.cb2.get() + "\t" + argtext)
@@ -155,6 +158,7 @@ def update_memo(argtext):
     f.close()
     memoframe.text.delete('1.0','end')
     for line in lines:
+        if line != "\n"
         root.update()
         memoframe.text.insert('end',line)
         memoframe.text.see('end')
