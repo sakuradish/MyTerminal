@@ -85,9 +85,8 @@ class MemoFrame(tk.Frame):
             self.text.insert('end',line)
 
 class InBoxFrame(tk.Frame):
-    def __init__(self, master=None):
-        tk.Frame.__init__(self, master)
-        self.master.title('Todo List')
+    def __init__(self, master=None,cnf={},**kw):
+        tk.Frame.__init__(self, master,cnf,**kw)
         self.num = 1
         self.todolist = []
         self.buttonlist = []
@@ -145,6 +144,31 @@ class InBoxFrame(tk.Frame):
         self.todolist = []
         self.buttonlist = []
         self.drawToDoList()
+class FrameCompose(tk.Frame):
+    def __init__(self, master=None,cnf={},**kw):
+        tk.Frame.__init__(self, master,cnf,**kw)
+        self.frames = []
+
+    def AddFrame(self, frame):
+        self.frames.append(frame)
+        rowmax = 1
+        while 1:
+            if rowmax * rowmax > len(self.frames):
+                rowmax -= 1
+                break
+            else:
+                rowmax += 1
+        colmax = int(len(self.frames) / rowmax)
+        offsety = 0.9 / rowmax
+        relheight = 0.9 / rowmax
+        offsetx = 1 / colmax
+        relwidth = 1 / colmax
+
+        for row in range(0, rowmax, 1):
+            for col in range(0, colmax, 1):
+                relx = col*offsetx
+                rely = 0.1+row*offsety
+                self.frames[row+col].place(relx=relx,rely=rely,relwidth=relwidth,relheight=relheight)
 
 def update_memo(argtext):
     argtext = argtext.replace("\n","")
@@ -216,10 +240,10 @@ if __name__ == '__main__':
     button2.bind("<Return>", show_both)
     button2.place(relx=0.2,relwidth=0.2)
 
-    memoframe = MemoFrame(root)
-    memoframe.place(relx=0,rely=0.1,relwidth=0.5,relheight=0.9)
-    inboxframe = InBoxFrame(root)
-    inboxframe.place(relx=0.5,rely=0.1,relwidth=0.5,relheight=0.9)
+    framecompose = FrameCompose(root)
+    framecompose.AddFrame(MemoFrame(root))
+    framecompose.AddFrame(InBoxFrame(root))
+
     root.bind("<Key>", OnKeyEvent)
     root.bind("<Button>", OnMouseEvent)
 
