@@ -87,6 +87,7 @@ class MemoFrame(tk.Frame):
 class InBoxFrame(tk.Frame):
     def __init__(self, master=None,cnf={},**kw):
         tk.Frame.__init__(self, master,cnf,**kw)
+        self.master.title('Todo List')
         self.num = 1
         self.todolist = []
         self.buttonlist = []
@@ -241,8 +242,12 @@ if __name__ == '__main__':
     button2.place(relx=0.2,relwidth=0.2)
 
     framecompose = FrameCompose(root)
-    framecompose.AddFrame(MemoFrame(root))
-    framecompose.AddFrame(InBoxFrame(root))
+    memoframe = MemoFrame(root)
+    inboxframe = InBoxFrame(root)
+    # framecompose.AddFrame(MemoFrame(root))
+    # framecompose.AddFrame(InBoxFrame(root))
+    framecompose.AddFrame(memoframe)
+    framecompose.AddFrame(inboxframe)
 
     root.bind("<Key>", OnKeyEvent)
     root.bind("<Button>", OnMouseEvent)
