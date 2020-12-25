@@ -8,48 +8,48 @@ import time
 class MemoFrame(tk.Frame):
     def __init__(self,master,cnf={},**kw):
         super().__init__(master,cnf,**kw)
-
+        self.draw()
+    def draw(self):
         my_font = font.Font(root,family=u'ＭＳ ゴシック',size=14)
-
         text = tk.Text(self,wrap=tk.CHAR,undo=True, bg='black',font=my_font, foreground='white', insertbackground='white')
         x_sb = tk.Scrollbar(self,orient='horizontal')
         y_sb = tk.Scrollbar(self,orient='vertical')
 
         with open('../data/new.txt','r') as f:
-            fruits = list()
+            values = list()
             lines = f.readlines()
             for line in lines:
-                if line != "\n" and not line.split("\t")[3] in fruits:
-                    fruits.append(line.split("\t")[3])
+                if line != "\n" and not line.split("\t")[3] in values:
+                    values.append(line.split("\t")[3])
         label1 = tk.Label(self, text='プロジェクト')
         self.v1 = tk.StringVar()
         cb1 = ttk.Combobox(
             self, textvariable=self.v1,
-            values=fruits)
-        cb1.set(fruits[-1])
+            values=values)
+        cb1.set(values[-1])
         with open('../data/new.txt','r') as f:
-            fruits = list()
+            values = list()
             lines = f.readlines()
             for line in lines:
-                if line != "\n" and not line.split("\t")[4] in fruits:
-                    fruits.append(line.split("\t")[4])
+                if line != "\n" and not line.split("\t")[4] in values:
+                    values.append(line.split("\t")[4])
         label2 = tk.Label(self, text='タスク')
         self.v2 = tk.StringVar()
         cb2 = ttk.Combobox(
             self, textvariable=self.v2,
-            values=fruits)
-        cb2.set(fruits[-1])
+            values=values)
+        cb2.set(values[-1])
         with open('../data/new.txt','r') as f:
-            fruits = list()
+            values = list()
             lines = f.readlines()
             for line in lines:
-                if line != "\n" and not line.split("\t")[5] in fruits:
-                    fruits.append(line.split("\t")[5])
+                if line != "\n" and not line.split("\t")[5] in values:
+                    values.append(line.split("\t")[5])
         label3 = tk.Label(self, text='メモ')
         self.v3 = tk.StringVar()
         cb3 = ttk.Combobox(
             self, textvariable=self.v3,
-            values=fruits)
+            values=values)
 
         x_sb.config(command=text.xview)
         y_sb.config(command=text.yview)
@@ -84,6 +84,7 @@ class MemoFrame(tk.Frame):
         for line in lines:
             self.text.insert('end',line)
 
+
 class InBoxFrame(tk.Frame):
     def __init__(self, master=None,cnf={},**kw):
         tk.Frame.__init__(self, master,cnf,**kw)
@@ -92,10 +93,10 @@ class InBoxFrame(tk.Frame):
         self.todolist = []
         self.buttonlist = []
         self.v1 = tk.StringVar()
-        fruits = []
+        values = []
         cb = ttk.Combobox(
             self, textvariable=self.v1,
-            values=fruits)
+            values=values)
         self.cb = cb
         cb.place(relx=0,rely=0,relwidth=1,relheight=0.1)
         self.initializeToDoList()
@@ -131,7 +132,7 @@ class InBoxFrame(tk.Frame):
                 #同じtodo無い前提いまのところ
                 if line == lines[index]:
                     with open('../data/done.txt','a') as o:
-                        update_memo("DONE : "+line)
+                        memodata.update_memo("DONE : "+line)
                         o.write(line)
                 else:
                     f.write(line)
@@ -140,8 +141,10 @@ class InBoxFrame(tk.Frame):
         self.num = 1
         for todo in self.todolist:
             todo.place_forget()
+            todo.destroy()
         for button in self.buttonlist:
             button.place_forget()
+            button.destroy()
         self.todolist = []
         self.buttonlist = []
         self.drawToDoList()
@@ -151,15 +154,23 @@ class FrameCompose(tk.Frame):
         self.frames = []
 
     def AddFrame(self, frame):
-        self.frames.append(frame)
+        self.frames.append([frame,True])
+        self.initialize()
+    def draw(self):
+        visibleFrames = []
+        framecnt = 0
+        for frame in self.frames:
+            if frame[1] == True:
+                framecnt += 1
+                visibleFrames.append(frame[0])
         rowmax = 1
         while 1:
-            if rowmax * rowmax > len(self.frames):
+            if rowmax * rowmax > framecnt:
                 rowmax -= 1
                 break
             else:
                 rowmax += 1
-        colmax = int(len(self.frames) / rowmax)
+        colmax = int(framecnt / rowmax)
         offsety = 0.9 / rowmax
         relheight = 0.9 / rowmax
         offsetx = 1 / colmax
@@ -169,24 +180,29 @@ class FrameCompose(tk.Frame):
             for col in range(0, colmax, 1):
                 relx = col*offsetx
                 rely = 0.1+row*offsety
-                self.frames[row+col].place(relx=relx,rely=rely,relwidth=relwidth,relheight=relheight)
-
-def update_memo(argtext):
-    argtext = argtext.replace("\n","")
-    with open("../data/new.txt", "w") as f:
-        f.write(memoframe.text.get('1.0','end').replace("\n\n","\n"))
-        dt = datetime.datetime.now()
-        date = dt.strftime("%Y/%m/%d") + "\t" + dt.strftime('%a') + "\t" + dt.strftime('%X')
-        f.write(date + "\t" + memoframe.cb1.get() + "\t" + memoframe.cb2.get() + "\t" + argtext)
-    f = open('../data/new.txt','r')
-    lines = f.readlines()
-    f.close()
-    memoframe.text.delete('1.0','end')
-    for line in lines:
-        if line != "\n":
-            root.update()
-            memoframe.text.insert('end',line)
-            memoframe.text.see('end')
+                visibleFrames[row+col].place(relx=relx,rely=rely,relwidth=relwidth,relheight=relheight)
+    def toggleView(self, event):
+        target = event.widget["text"]
+        for frame in self.frames:
+            if str(frame[0]) == target:
+                print(str(frame[0]), target)
+                if frame[1] == True:
+                    frame[1] = False
+                else:
+                    frame[1] = True
+            print(self.frames)
+        self.initialize()
+    def initialize(self):
+        for frame in self.frames:
+            frame[0].place_forget()
+        num = 0
+        for frame in self.frames:
+            button1 = tk.Button(root, text=str(frame[0]), highlightbackground='gray')
+            button1.bind("<Button-1>", self.toggleView)
+            button1.bind("<Return>", self.toggleView)
+            button1.place(relwidth=0.1, relx=num*0.1)
+            num += 1
+        self.draw()
 
 isKeyEventProcessing = False
 def OnKeyEvent(event):
@@ -194,13 +210,13 @@ def OnKeyEvent(event):
     if isKeyEventProcessing == False:
         if event.keysym == 'Return' and memoframe.cb3 == root.focus_get() and memoframe.cb3.get() != "":
             isKeyEventProcessing = True
-            update_memo(memoframe.cb3.get())
+            memodata.update_memo(memoframe.cb3.get())
             memoframe.cb3.set("")
             isKeyEventProcessing = False
         elif event.keysym == 'Return' and inboxframe.cb == root.focus_get() and inboxframe.cb.get() != "":
             isKeyEventProcessing = True
             print(event)
-            update_memo("TODO : "+inboxframe.cb.get())
+            memodata.update_memo("TODO : "+inboxframe.cb.get())
             with open("../data/todo.txt", "a") as f:
                 f.write(inboxframe.cb.get() + "\n")
             inboxframe.initializeToDoList()
@@ -209,22 +225,30 @@ def OnKeyEvent(event):
 def OnMouseEvent(event):
     print(event)
 
-def show_left(event):
-    memoframe.place_forget()
-    inboxframe.place_forget()
-    for i in range(1,101,1):
-        memoframe.place(relx=0,rely=0.1,relwidth=0.5+i/200,relheight=0.9)
-        inboxframe.place(relx=0.5+i/200,rely=0.1,relwidth=0.5-i/200,relheight=0.9)
-        root.update()
-def show_both(event):
-    memoframe.place_forget()
-    inboxframe.place_forget()
-    memoframe.place(relx=0,rely=0.1,relwidth=0.5,relheight=0.9)
-    inboxframe.place(relx=0.5,rely=0.1,relwidth=0.5,relheight=0.9)
-
 def show_time():
-    print(datetime.datetime(2021, 5, 5, 10,10,10) - datetime.datetime.now())
+    # print(datetime.datetime(2021, 5, 5, 10,10,10) - datetime.datetime.now())
     root.after(1000,show_time)
+
+class MemoData():
+    def __init__(self, filepath):
+        self.filepath = filepath
+        print(self.filepath)
+    def update_memo(self,argtext):
+        argtext = argtext.replace("\n","")
+        with open("../data/new.txt", "w") as f:
+            f.write(memoframe.text.get('1.0','end').replace("\n\n","\n"))
+            dt = datetime.datetime.now()
+            date = dt.strftime("%Y/%m/%d") + "\t" + dt.strftime('%a') + "\t" + dt.strftime('%X')
+            f.write(date + "\t" + memoframe.cb1.get() + "\t" + memoframe.cb2.get() + "\t" + argtext)
+        f = open('../data/new.txt','r')
+        lines = f.readlines()
+        f.close()
+        memoframe.text.delete('1.0','end')
+        for line in lines:
+            if line != "\n":
+                root.update()
+                memoframe.text.insert('end',line)
+                memoframe.text.see('end')
 
 if __name__ == '__main__':
     # ウィンドウ作成
@@ -232,15 +256,8 @@ if __name__ == '__main__':
     root.title("MyTerminal")
     root.minsize(root.winfo_screenwidth(), root.winfo_screenheight())
     root.state("zoomed")
-    button1 = tk.Button(root, text="LEFT", highlightbackground='gray')
-    button1.bind("<Button-1>", show_left)
-    button1.bind("<Return>", show_left)
-    button1.place(relwidth=0.2)
-    button2 = tk.Button(root, text="BOTH", highlightbackground='gray')
-    button2.bind("<Button-1>", show_both)
-    button2.bind("<Return>", show_both)
-    button2.place(relx=0.2,relwidth=0.2)
 
+    memodata = MemoData("aaa")
     framecompose = FrameCompose(root)
     memoframe = MemoFrame(root)
     inboxframe = InBoxFrame(root)
