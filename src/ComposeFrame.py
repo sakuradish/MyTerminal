@@ -1,5 +1,6 @@
 # ===================================================================================
 import tkinter as tk
+import datetime
 # from tkinter import font
 from tkinter import ttk
 # from PIL import Image, ImageTk
@@ -14,16 +15,17 @@ class ComposeFrame(tk.Frame):
         self.isMouseEventProcessing = False
         self.master.bind("<Key>", self.OnKeyEvent)
         self.master.bind("<Button>", self.OnMouseEvent)
+        self.OnTick()
 # ===================================================================================
-    def AddFrame(self, frame, id, key=None, mouse=None):
+    def AddFrame(self, frame, id, key=None, mouse=None, time=None):
         button = tk.Button(self.master, text=id)
         # button.state(['pressed'])
         button.bind("<Button-1>", self.toggleView)
         button.bind("<Return>", self.toggleView)
         if len(self.frames) < 2:
-            self.frames.append([frame, id, True, button, key, mouse])
+            self.frames.append([frame, id, True, button, key, mouse, time])
         else:
-            self.frames.append([frame, id, False, button, key, mouse])
+            self.frames.append([frame, id, False, button, key, mouse, time])
         self.initialize()
 # ===================================================================================
     def Draw(self):
@@ -97,6 +99,13 @@ class ComposeFrame(tk.Frame):
                 if frame[5]:
                     frame[5](event)
             self.isMouseEventProcessing = False
+# ===================================================================================
+    def OnTick(self):
+        for frame in self.frames:
+            if frame[6]:
+                frame[6]()
+        # print(datetime.datetime(2021, 5, 5, 10,10,10) - datetime.datetime.now())
+        self.master.after(1000,self.OnTick)
 # ===================================================================================
 if __name__ == '__main__':
     # ウィンドウ作成
