@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     # database
     memodata = MyDataBase("../data/memo.txt", ['project', 'task', 'memo'])
-    tododata = MyDataBase("../data/todo.txt", ['todo'])
+    tododata = MyDataBase("../data/todo.txt", ['todo', 'year', 'month', 'date'])
     donedata = MyDataBase("../data/done.txt", ['done'])
     attendancedata = MyDataBase("../data/attendance.txt", ['year', 'month', 'date', 'weekday', 'type', 'time'])
     # memoframe
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     # composeframe
     composeframe = ComposeFrame(root)
     composeframe.AddFrame(memoframe, 'memoframe', key=memoframe.OnKeyEvent)
-    composeframe.AddFrame(inboxframe, 'inboxframe', key=inboxframe.OnKeyEvent)
+    composeframe.AddFrame(inboxframe, 'inboxframe', key=inboxframe.OnKeyEvent, time=inboxframe.OnTick)
     composeframe.AddFrame(attendanceframe, 'attendanceframe', key=attendanceframe.OnKeyEvent)
     composeframe.AddFrame(frame1, '#000000')
     composeframe.AddFrame(frame2, '#0000ff')
