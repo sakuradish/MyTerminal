@@ -11,6 +11,15 @@ class MyDataBase():
         if not os.path.exists(self.filepath):
             with open(self.filepath, 'a', encoding='utf-8') as f:
                 print("Create " + self.filepath)
+        self.DailyBackup()
+# ===================================================================================
+    def DailyBackup(self):
+        folder = "../backup/" + str(datetime.date.today()) + "/"
+        file = folder + os.path.basename(self.filepath)
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        if not os.path.exists(file):
+            shutil.copy2(self.filepath, file)
 # ===================================================================================
     def InsertRecordWithDate(self, *records):
         print(records)
@@ -29,10 +38,7 @@ class MyDataBase():
             f.write(record.replace("\n", "") + "\n")
 # ===================================================================================
     def DeleteAllRecords(self):
-        shutil.copy2(self.filepath, self.filepath +".backup")
         os.remove(self.filepath)
-        with open(self.filepath, 'a', encoding='utf-8') as f:
-            print("Create " + self.filepath)
 # ===================================================================================
     # def DeleteRecordByData(self, column, data):
     #     index = self.columns.index(column)
