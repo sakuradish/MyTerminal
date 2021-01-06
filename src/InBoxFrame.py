@@ -159,7 +159,8 @@ class InBoxFrame(tk.Frame):
         deletenum = int(event.widget["text"].split(" ")[1])
         index = deletenum-1
         lines = self.tododata.GetAllRecordsByColumn('todo')
-        self.memodata.InsertRecordWithDate(self.cb1.get(),lines[index],"DONE : "+lines[index])
+        projects = self.tododata.GetAllRecordsByColumn('project')
+        self.memodata.InsertRecordWithDate(projects[index],lines[index],"DONE : "+lines[index])
         self.tododata.DeleteRecordByIndex(index)
         self.donedata.InsertRecordWithDate(lines[index])
         self.InitializeDynamicWidget()
