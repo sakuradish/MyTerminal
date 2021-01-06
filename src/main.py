@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     # database
     memodata = MyDataBase("../data/memo.txt", ['project', 'task', 'memo'])
-    tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date'])
+    tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date', 'hour', 'minute'])
     donedata = MyDataBase("../data/done.txt", ['done'])
     attendancedata = MyDataBase("../data/attendance.txt", ['year', 'month', 'date', 'weekday', 'type', 'time'])
     # memoframe
