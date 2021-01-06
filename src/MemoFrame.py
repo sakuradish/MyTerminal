@@ -67,30 +67,34 @@ class MemoFrame(tk.Frame):
 # ===================================================================================
     def OnKeyEvent(self, event):
         if event.keysym == 'Return':
-            print(self.master.focus_get())
-            if self.cb3 == self.master.focus_get() and self.cb3.get() != "":
-                self.memodata.InsertRecordWithDate(self.cb1.get(),self.cb2.get(),self.cb3.get())
-                self.cb3.set("")
+            if self.cb1 == self.master.focus_get() or \
+               self.cb2 == self.master.focus_get() or \
+               self.cb3 == self.master.focus_get():
+            #     self.memodata.InsertRecordWithDate(self.cb1.get(),self.cb2.get(),self.cb3.get())
+            #     self.cb3.set("")
                 self.UpdateText()
 # ===================================================================================
     def UpdateText(self):
         self.text.delete('1.0','end')
         for record in self.memodata.GetAllRecords():
             # self.master.update()
-            self.text.insert('end',record)
+            if record.split("\t")[3].find(self.cb1.get()) != -1 and \
+               record.split("\t")[4].find(self.cb2.get()) != -1 and \
+               record.split("\t")[5].find(self.cb3.get()) != -1:
+                self.text.insert('end',record)
         self.text.see('end')
         records = self.memodata.GetAllRecordsByColumn('project')
         records = list(dict.fromkeys(records))
         self.cb1.configure(values=records)
-        self.cb1.set(self.memodata.GetLastRecordsByColumn('project'))
+        # self.cb1.set("")
         records = self.tododata.GetAllRecordsByColumn('todo')
         records = list(dict.fromkeys(records))
         self.cb2.configure(values=records)
-        self.cb2.set(self.tododata.GetLastRecordsByColumn('todo'))
+        # self.cb2.set("")
         records = self.memodata.GetAllRecordsByColumn('memo')
         records = list(dict.fromkeys(records))
         self.cb3.configure(values=records)
-        self.cb3.set("")
+        # self.cb3.set("")
 # ===================================================================================
 if __name__ == '__main__':
     # ウィンドウ作成
