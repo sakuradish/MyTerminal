@@ -107,6 +107,8 @@ class InBoxFrame(tk.Frame):
             todo[1].destroy()
             todo[2].place_forget()
             todo[2].destroy()
+            todo[3].place_forget()
+            todo[3].destroy()
         self.todolist = []
         self.buttonlist = []
         self.UpdateDynamicWidgetProperty()

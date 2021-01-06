@@ -76,9 +76,9 @@ class MemoFrame(tk.Frame):
     def UpdateText(self):
         self.text.delete('1.0','end')
         for record in self.memodata.GetAllRecords():
-            self.master.update()
+            # self.master.update()
             self.text.insert('end',record)
-            self.text.see('end')
+        self.text.see('end')
         records = self.memodata.GetAllRecordsByColumn('project')
         records = list(dict.fromkeys(records))
         self.cb1.configure(values=records)
