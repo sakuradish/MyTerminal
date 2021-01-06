@@ -16,6 +16,7 @@ class MemoFrame(tk.Frame):
         self.memodata = memodata
         self.memodata.AddOnUpdateCallback(self.UpdateText)
         self.tododata = tododata
+        self.tododata.AddOnUpdateCallback(self.UpdateText)
         self.draw()
     def draw(self):
         # text
