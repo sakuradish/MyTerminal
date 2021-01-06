@@ -19,7 +19,7 @@ if __name__ == '__main__':
     donedata = MyDataBase("../data/done.txt", ['done'])
     attendancedata = MyDataBase("../data/attendance.txt", ['year', 'month', 'date', 'weekday', 'type', 'time'])
     # memoframe
-    memoframe = MemoFrame(root, memodata)
+    memoframe = MemoFrame(root, memodata, tododata)
     # inboxframe
     inboxframe = InBoxFrame(root, memodata, tododata, donedata)
     # attendanceframe

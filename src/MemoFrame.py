@@ -11,10 +11,11 @@ from PIL import Image, ImageTk
 import time
 # ===================================================================================
 class MemoFrame(tk.Frame):
-    def __init__(self,master, memodata,cnf={},**kw):
+    def __init__(self,master, memodata, tododata, cnf={},**kw):
         super().__init__(master,cnf,**kw)
         self.memodata = memodata
         self.memodata.AddOnUpdateCallback(self.UpdateText)
+        self.tododata = tododata
         self.draw()
     def draw(self):
         # text
@@ -81,10 +82,10 @@ class MemoFrame(tk.Frame):
         records = list(dict.fromkeys(records))
         self.cb1.configure(values=records)
         self.cb1.set(self.memodata.GetLastRecordsByColumn('project'))
-        records = self.memodata.GetAllRecordsByColumn('task')
+        records = self.tododata.GetAllRecordsByColumn('todo')
         records = list(dict.fromkeys(records))
         self.cb2.configure(values=records)
-        self.cb2.set(self.memodata.GetLastRecordsByColumn('task'))
+        self.cb2.set(self.tododata.GetLastRecordsByColumn('todo'))
         records = self.memodata.GetAllRecordsByColumn('memo')
         records = list(dict.fromkeys(records))
         self.cb3.configure(values=records)
@@ -99,7 +100,8 @@ if __name__ == '__main__':
 
     framecompose = ComposeFrame(root)
     memodata = MyDataBase("../data/memo.txt", ['project', 'task', 'memo'])
-    memoframe = MemoFrame(root, memodata)
+    tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date'])
+    memoframe = MemoFrame(root, memodata, tododata)
     framecompose.AddFrame(memoframe, 'memoframe', key=memoframe.OnKeyEvent)
 
     # メインループ
