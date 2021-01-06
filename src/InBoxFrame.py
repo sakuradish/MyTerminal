@@ -20,7 +20,6 @@ class InBoxFrame(tk.Frame):
         self.todolist = []
         self.InitializeStaticWidget()
         self.InitializeDynamicWidget()
-        self.UpdateData()
 # ===================================================================================
     def InitializeStaticWidget(self):
         # combobox1
@@ -53,6 +52,7 @@ class InBoxFrame(tk.Frame):
         cb5 = ttk.Combobox(self, textvariable=self.v5)
         self.label5 = label5
         self.cb5 = cb5
+        self.UpdateStaticWidgetProperty()
         self.PlaceStaticWidget()
 # ===================================================================================
     def PlaceStaticWidget(self):
@@ -72,54 +72,7 @@ class InBoxFrame(tk.Frame):
         self.label5.place(relx=0,rely=0.2,relwidth=0.2,relheight=0.05)
         self.cb5.place(relx=0.2,rely=0.2,relwidth=0.8,relheight=0.05)
 # ===================================================================================
-    def PlaceDynamicWidget(self):
-        num = 1
-        records = self.tododata.GetAllRecords()
-        for record in records:
-            # 新規タスクを追加
-            todotext = tk.StringVar()
-            todotext.set(record.split("\t")[3])
-            todo = tk.Label(self, textvariable=todotext)
-            todo.place(rely=num*0.03+0.3, relx=0, relwidth=0.5)
-
-            # 残り時間を表示
-            remaintext = tk.StringVar()
-            remaintext.set(str(datetime.datetime(int(record.split("\t")[4]), int(record.split("\t")[5]), int(record.split("\t")[6])) - datetime.datetime.now()))
-            remain = tk.Label(self, textvariable=remaintext)
-            remain.place(rely=num*0.03+0.3, relx=0.5, relwidth=0.2)
-
-            # 新規タスクの削除ボタンを追加
-            button = tk.Button(self, text="DONE "+ str(num), highlightbackground='gray')
-            button.bind("<Button-1>", self.CompleteToDo)
-            button.bind("<Return>", self.CompleteToDo)
-            button.place(rely=num*0.03+0.3, relx=0.7, relwidth=0.2)
-
-            self.todolist.append([todo, remain, button])
-
-            num += 1
-# ===================================================================================
-    def CompleteToDo(self, event):
-        deletenum = int(event.widget["text"].split(" ")[1])
-        index = deletenum-1
-        lines = self.tododata.GetAllRecordsByColumn('todo')
-        self.memodata.InsertRecordWithDate(self.cb1.get(),lines[index],"DONE : "+lines[index])
-        self.tododata.DeleteRecordByIndex(index)
-        self.donedata.InsertRecordWithDate(lines[index])
-        self.InitializeDynamicWidget()
-# ===================================================================================
-    def InitializeDynamicWidget(self):
-        for todo in self.todolist:
-            todo[0].place_forget()
-            todo[0].destroy()
-            todo[1].place_forget()
-            todo[1].destroy()
-            todo[2].place_forget()
-            todo[2].destroy()
-        self.todolist = []
-        self.buttonlist = []
-        self.PlaceDynamicWidget()
-# ===================================================================================
-    def UpdateData(self):
+    def UpdateStaticWidgetProperty(self):
         # combobox1
         records = self.memodata.GetAllRecordsByColumn('project')
         records = list(dict.fromkeys(records))
@@ -145,10 +98,72 @@ class InBoxFrame(tk.Frame):
         records = list(dict.fromkeys(records))
         self.cb5.configure(values=records)
         self.cb5.set(self.tododata.GetLastRecordsByColumn('date'))
-    def OnTick(self):
+# ===================================================================================
+    def InitializeDynamicWidget(self):
+        for todo in self.todolist:
+            todo[0].place_forget()
+            todo[0].destroy()
+            todo[1].place_forget()
+            todo[1].destroy()
+            todo[2].place_forget()
+            todo[2].destroy()
+        self.todolist = []
+        self.buttonlist = []
+        self.UpdateDynamicWidgetProperty()
+        self.PlaceDynamicWidget()
+# ===================================================================================
+    def PlaceDynamicWidget(self):
+        num = 1
+        records = self.tododata.GetAllRecords()
+        for record in records:
+            # プロジェクトを表示
+            projecttext = tk.StringVar()
+            project = tk.Label(self, textvariable=projecttext)
+            project.place(rely=num*0.03+0.3, relx=0, relwidth=0.2)
+
+            # タスクを表示
+            todotext = tk.StringVar()
+            todo = tk.Label(self, textvariable=todotext)
+            todo.place(rely=num*0.03+0.3, relx=0.2, relwidth=0.3)
+
+            # 残り時間を表示
+            remaintext = tk.StringVar()
+            remain = tk.Label(self, textvariable=remaintext)
+            remain.place(rely=num*0.03+0.3, relx=0.5, relwidth=0.2)
+
+            # 新規タスクの削除ボタンを追加
+            button = tk.Button(self, text="DONE "+ str(num), highlightbackground='gray')
+            button.bind("<Button-1>", self.CompleteToDo)
+            button.bind("<Return>", self.CompleteToDo)
+            button.place(rely=num*0.03+0.3, relx=0.7, relwidth=0.2)
+
+            self.todolist.append([project, todo, remain, button, record])
+
+            num += 1
+# ===================================================================================
+    def UpdateDynamicWidgetProperty(self):
+        for todo in self.todolist:
+            projecttext = tk.StringVar()
+            projecttext.set(todo[4].split("\t")[3])
+            todo[0].configure(textvariable=projecttext)
+            todotext = tk.StringVar()
+            todotext.set(todo[4].split("\t")[4])
+            todo[1].configure(textvariable=todotext)
+            remaintext = tk.StringVar()
+            remaintext.set(str(datetime.datetime(int(todo[4].split("\t")[5]), int(todo[4].split("\t")[6]), int(todo[4].split("\t")[7]), 23,0,0) - datetime.datetime.now()))
+            todo[2].configure(textvariable=remaintext)
+# ===================================================================================
+    def CompleteToDo(self, event):
+        deletenum = int(event.widget["text"].split(" ")[1])
+        index = deletenum-1
+        lines = self.tododata.GetAllRecordsByColumn('todo')
+        self.memodata.InsertRecordWithDate(self.cb1.get(),lines[index],"DONE : "+lines[index])
+        self.tododata.DeleteRecordByIndex(index)
+        self.donedata.InsertRecordWithDate(lines[index])
         self.InitializeDynamicWidget()
-        # for todo in self.todolist:
-        #     todo[1][1].set(str(datetime.datetime(2021, 5, 5, 10,10,10) - datetime.datetime.now()))
+# ===================================================================================
+    def OnTick(self):
+        self.UpdateDynamicWidgetProperty()
 # ===================================================================================
     def OnKeyEvent(self, event):
         if event.keysym == 'Return':
@@ -158,10 +173,10 @@ class InBoxFrame(tk.Frame):
                 year = self.cb3.get()
                 month = self.cb4.get()
                 date = self.cb5.get()
-                self.tododata.InsertRecordWithDate(task, year, month, date)
+                self.tododata.InsertRecordWithDate(project, task, year, month, date)
                 self.memodata.InsertRecordWithDate(project, task, "TODO : "+task)
                 self.InitializeDynamicWidget()
-                self.UpdateData()
+                self.UpdateStaticWidgetProperty()
 # ===================================================================================
 if __name__ == '__main__':
     # ウィンドウ作成
@@ -172,7 +187,7 @@ if __name__ == '__main__':
 
     framecompose = ComposeFrame(root)
     memodata = MyDataBase("../data/memo.txt", ['project', 'task', 'memo'])
-    tododata = MyDataBase("../data/todo.txt", ['todo', 'year', 'month', 'date'])
+    tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date'])
     donedata = MyDataBase("../data/done.txt", ['done'])
     inboxframe = InBoxFrame(root, memodata, tododata, donedata)
     framecompose.AddFrame(inboxframe, 'inboxframe', key=inboxframe.OnKeyEvent, time=inboxframe.OnTick)
