@@ -14,7 +14,6 @@ class InBoxFrame(tk.Frame):
     def __init__(self, master, memodata, tododata, donedata ,cnf={},**kw):
         super().__init__(master,cnf,**kw)
         self.memodata = memodata
-        self.memodata.AddOnUpdateCallback(self.InitializeDynamicWidget)
         self.tododata = tododata
         self.donedata = donedata
         self.todolist = []
@@ -230,6 +229,7 @@ class InBoxFrame(tk.Frame):
                         lines = self.tododata.GetAllRecordsByColumn('todo')
                         projects = self.tododata.GetAllRecordsByColumn('project')
                         self.memodata.InsertRecordWithDate(projects[index], lines[index], todo[1][4].get())
+                        todo[1][4].delete(0,'end')
 # ===================================================================================
 if __name__ == '__main__':
     # ウィンドウ作成
