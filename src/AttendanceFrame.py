@@ -100,11 +100,12 @@ class AttendanceFrame(tk.Frame):
                 self.UpdateData()
 # ===================================================================================
     def UpdateData(self):
+        self.text.configure(state='normal')
         self.text.delete('1.0','end')
         for record in self.attendancedata.GetAllRecords():
-            self.master.update()
             self.text.insert('end',record)
-            self.text.see('end')
+        self.text.see('end')
+        self.text.configure(state='disabled')
         # combobox1
         records = self.attendancedata.GetAllRecordsByColumn('year')
         records = list(dict.fromkeys(records))
