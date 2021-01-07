@@ -138,7 +138,7 @@ class InBoxFrame(tk.Frame):
 # ===================================================================================
     def PlaceDynamicWidget(self):
         num = 1
-        records = self.tododata.GetAllRecords()
+        records = self.tododata.GetAllRecords(sort='project')
         for record in records:
 
             # プロジェクトを表示

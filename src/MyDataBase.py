@@ -85,8 +85,20 @@ class MyDataBase():
         else:
             return ""
 # ===================================================================================
-    def GetAllRecords(self):
-        return open(self.filepath, 'r', encoding='utf-8').readlines()
+    def GetAllRecords(self, sort=""):
+        if not sort:
+            return open(self.filepath, 'r', encoding='utf-8').readlines()
+        else:
+            index = self.columns.index(sort)
+            sorted = []
+            records = open(self.filepath, 'r', encoding='utf-8').readlines()
+            sortitems = [record.split("\t")[index + 3] for record in records]
+            sortitems = list(dict.fromkeys(sortitems))
+            for item in sortitems:
+                for record in records:
+                    if record.split("\t")[index + 3] == item:
+                        sorted.append(record)
+            return sorted
 # ===================================================================================
     def AddOnUpdateCallback(self, callback):
         self.callbacks.append(callback)
