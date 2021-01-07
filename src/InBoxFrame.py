@@ -12,11 +12,11 @@ import time
 import math
 # ===================================================================================
 class InBoxFrame(tk.Frame):
-    def __init__(self, master, memodata, tododata, donedata ,cnf={},**kw):
+    def __init__(self, master, memodata, tododata, tasklog ,cnf={},**kw):
         super().__init__(master,cnf,**kw)
         self.memodata = memodata
         self.tododata = tododata
-        self.donedata = donedata
+        self.tasklog = tasklog
         self.todolist = []
         self.itemnum = 18
         self.InitializeStaticWidget()
@@ -202,7 +202,12 @@ class InBoxFrame(tk.Frame):
             # 残り時間を表示
             remaintext = tk.StringVar()
             remain = tk.Label(self, textvariable=remaintext)
-            remain.place(rely=count*0.03+0.4, relx=0.5, relwidth=0.2)
+            remain.place(rely=count*0.03+0.4, relx=0.5, relwidth=0.15)
+
+            # statusを表示
+            statustext = tk.StringVar()
+            status = tk.Label(self, textvariable=statustext)
+            status.place(rely=count*0.03+0.4, relx=0.65, relwidth=0.05)
 
             # 新規タスクの削除ボタンを追加
             button = tk.Button(self, text="DONE "+ str(num), highlightbackground='gray')
@@ -218,7 +223,7 @@ class InBoxFrame(tk.Frame):
             separator = ttk.Separator(self)
             separator.place(rely=count*0.03+0.4, relx=0, relwidth=1)
 
-            self.todolist.append([num, [project, todo, remain, button, memo, separator], records[num]])
+            self.todolist.append([num, [project, todo, remain, button, memo, separator, status], records[num]])
 
             count += 1
 # ===================================================================================
@@ -240,6 +245,9 @@ class InBoxFrame(tk.Frame):
             text = text[:text.rfind(".")]
             remaintext.set(text)
             todo[1][2].configure(textvariable=remaintext)
+            statustext = tk.StringVar()
+            statustext.set(todo[2].split("\t")[10])
+            todo[1][6].configure(textvariable=statustext)
 # ===================================================================================
     def PagePrev(self, event):
         total = int(self.totalpage.cget('text'))
@@ -266,11 +274,17 @@ class InBoxFrame(tk.Frame):
             if todo[1][3] == event.widget:
                 deletenum = todo[0]
         index = deletenum-1
-        lines = self.tododata.GetAllRecordsByColumn('todo')
-        projects = self.tododata.GetAllRecordsByColumn('project')
-        self.memodata.InsertRecordWithDate(projects[index],lines[index],"DONE : "+lines[index])
+        project = self.tododata.GetAllRecordsByColumn('project')[index]
+        todo = self.tododata.GetAllRecordsByColumn('todo')[index]
+        year = self.tododata.GetAllRecordsByColumn('year')[index]
+        month = self.tododata.GetAllRecordsByColumn('month')[index]
+        date = self.tododata.GetAllRecordsByColumn('date')[index]
+        hour = self.tododata.GetAllRecordsByColumn('hour')[index]
+        minute = self.tododata.GetAllRecordsByColumn('minute')[index]
+        # self.memodata.InsertRecordWithDate(project[index],todo[index],"DONE : "+todo[index])
         self.tododata.DeleteRecordByIndex(index)
-        self.donedata.InsertRecordWithDate(lines[index])
+        self.tododata.InsertRecordWithDate(project,todo,year,month,date,hour,minute,"DONE")
+        self.tasklog.InsertRecordWithDate(project,todo,"DONE")
         self.InitializeDynamicWidget()
 # ===================================================================================
     def OnTick(self):
@@ -286,8 +300,8 @@ class InBoxFrame(tk.Frame):
                 date = self.cb5.get()
                 hour = self.cb6.get()
                 minute = self.cb7.get()
-                self.tododata.InsertRecordWithDate(project, task, year, month, date, hour, minute)
-                self.memodata.InsertRecordWithDate(project, task, "TODO : "+task)
+                self.tododata.InsertRecordWithDate(project, task, year, month, date, hour, minute, "OPEN")
+                self.tasklog.InsertRecordWithDate(project,task,"OPEN")
                 self.InitializeDynamicWidget()
                 self.UpdateStaticWidgetProperty()
             elif self.currentpage == self.master.focus_get() and self.currentpage.get() != "":
@@ -311,9 +325,9 @@ if __name__ == '__main__':
 
     framecompose = ComposeFrame(root)
     memodata = MyDataBase("../data/memo.txt", ['project', 'task', 'memo'])
-    tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date', 'hour', 'minute'])
-    donedata = MyDataBase("../data/done.txt", ['done'])
-    inboxframe = InBoxFrame(root, memodata, tododata, donedata)
+    tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date', 'hour', 'minute', 'state'])
+    tasklog = MyDataBase("../data/done.txt", ['project', 'task', 'state'])
+    inboxframe = InBoxFrame(root, memodata, tododata, tasklog)
     framecompose.AddFrame(inboxframe, 'inboxframe', key=inboxframe.OnKeyEvent, time=inboxframe.OnTick)
 
     # メインループ

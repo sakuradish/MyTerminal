@@ -9,6 +9,8 @@ class MyDataBase():
         self.columns = columns
         self.callbacks = []
         if not os.path.exists(self.filepath):
+            if not os.path.exists(os.path.dirname(self.filepath)):
+                os.makedirs(os.path.dirname(self.filepath))
             with open(self.filepath, 'a', encoding='utf-8') as f:
                 print("Create " + self.filepath)
         self.DailyBackup()

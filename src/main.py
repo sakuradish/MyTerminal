@@ -15,13 +15,13 @@ if __name__ == '__main__':
 
     # database
     memodata = MyDataBase("../data/memo.txt", ['project', 'task', 'memo'])
-    tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date', 'hour', 'minute'])
-    donedata = MyDataBase("../data/done.txt", ['done'])
+    tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date', 'hour', 'minute', 'state'])
+    tasklog = MyDataBase("../data/done.txt", ['project', 'task', 'state'])
     attendancedata = MyDataBase("../data/attendance.txt", ['year', 'month', 'date', 'weekday', 'type', 'time'])
     # memoframe
     memoframe = MemoFrame(root, memodata, tododata)
     # inboxframe
-    inboxframe = InBoxFrame(root, memodata, tododata, donedata)
+    inboxframe = InBoxFrame(root, memodata, tododata, tasklog)
     # attendanceframe
     attendanceframe = AttendanceFrame(root, attendancedata)
     # sampleframes
