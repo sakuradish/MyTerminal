@@ -246,20 +246,20 @@ class InBoxFrame(tk.Frame):
         current = int(self.currentpage.get())
         if 1 < current:
             current -= 1
-        self.currentpage.delete(0, 'end')
-        self.currentpage.insert(0, str(current))
-        self.InitializeDynamicWidget()
-        self.UpdateStaticWidgetProperty()
+            self.currentpage.delete(0, 'end')
+            self.currentpage.insert(0, str(current))
+            self.InitializeDynamicWidget()
+            self.UpdateStaticWidgetProperty()
 # ===================================================================================
     def PageNext(self, event):
         total = int(self.totalpage.cget('text'))
         current = int(self.currentpage.get())
         if current < total:
             current += 1
-        self.currentpage.delete(0, 'end')
-        self.currentpage.insert(0, str(current))
-        self.InitializeDynamicWidget()
-        self.UpdateStaticWidgetProperty()
+            self.currentpage.delete(0, 'end')
+            self.currentpage.insert(0, str(current))
+            self.InitializeDynamicWidget()
+            self.UpdateStaticWidgetProperty()
 # ===================================================================================
     def CompleteToDo(self, event):
         for todo in self.todolist:
