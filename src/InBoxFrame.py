@@ -9,6 +9,7 @@ from tkinter import font
 from tkinter import ttk
 from PIL import Image, ImageTk
 import time
+import math
 # ===================================================================================
 class InBoxFrame(tk.Frame):
     def __init__(self, master, memodata, tododata, donedata ,cnf={},**kw):
@@ -17,6 +18,7 @@ class InBoxFrame(tk.Frame):
         self.tododata = tododata
         self.donedata = donedata
         self.todolist = []
+        self.itemnum = 18
         self.InitializeStaticWidget()
         self.InitializeDynamicWidget()
 # ===================================================================================
@@ -63,6 +65,30 @@ class InBoxFrame(tk.Frame):
         cb7 = ttk.Combobox(self, textvariable=self.v7)
         self.label7 = label7
         self.cb7 = cb7
+        # how many item show at one time
+        totalpage = tk.Label(self)
+        v = tk.StringVar()
+        v.set('1')
+        totalpage.configure(textvariable=v)
+        pagelavel1 = tk.Label(self, text='ページ中')
+        currentpage = tk.Entry(self)
+        currentpage.insert(0, '1')
+        pagelavel2 = tk.Label(self, text='ページ目を表示中')
+        self.totalpage = totalpage
+        self.pagelavel1 = pagelavel1
+        self.currentpage = currentpage
+        self.pagelavel2 = pagelavel2
+        # prev page button
+        prev = tk.Button(self, text="prev", highlightbackground='gray')
+        prev.bind("<Button-1>", self.PagePrev)
+        prev.bind("<Return>", self.PagePrev)
+        self.prev = prev
+        # next page button
+        next = tk.Button(self, text="next", highlightbackground='gray')
+        next.bind("<Button-1>", self.PageNext)
+        next.bind("<Return>", self.PageNext)
+        self.next = next
+
         self.UpdateStaticWidgetProperty()
         self.PlaceStaticWidget()
 # ===================================================================================
@@ -88,6 +114,15 @@ class InBoxFrame(tk.Frame):
         # combobox7
         self.label7.place(relx=0,rely=0.3,relwidth=0.2,relheight=0.05)
         self.cb7.place(relx=0.2,rely=0.3,relwidth=0.8,relheight=0.05)
+        # how many item show at one time
+        self.totalpage.place(relx=0,rely=0.35,relwidth=0.1,relheight=0.05)
+        self.pagelavel1.place(relx=0.1,rely=0.35,relwidth=0.15,relheight=0.05)
+        self.currentpage.place(relx=0.25,rely=0.35,relwidth=0.1,relheight=0.05)
+        self.pagelavel2.place(relx=0.35,rely=0.35,relwidth=0.15,relheight=0.05)
+        # prev page button
+        self.prev.place(relx=0.5,rely=0.35,relwidth=0.25,relheight=0.05)
+        # next page button
+        self.next.place(relx=0.75,rely=0.35,relwidth=0.25,relheight=0.05)
 # ===================================================================================
     def UpdateStaticWidgetProperty(self):
         # combobox1
@@ -137,42 +172,55 @@ class InBoxFrame(tk.Frame):
         self.PlaceDynamicWidget()
 # ===================================================================================
     def PlaceDynamicWidget(self):
-        num = 1
+
         records = self.tododata.GetAllRecords(sort='project')
-        for record in records:
+        recordnum = len(records)
+
+        totalpage = tk.StringVar()
+        text = str(math.ceil(recordnum / self.itemnum))
+        totalpage.set(text)
+        self.totalpage.configure(textvariable=totalpage)
+
+        start = (int(self.currentpage.get())-1) * self.itemnum
+        end = start + self.itemnum
+
+        count = 1
+        for num in range(start, end, 1):
+            if len(records) <= num:
+                break
 
             # プロジェクトを表示
             projecttext = tk.StringVar()
             project = tk.Label(self, textvariable=projecttext)
-            project.place(rely=num*0.03+0.35, relx=0, relwidth=0.1)
+            project.place(rely=count*0.03+0.4, relx=0, relwidth=0.1)
 
             # タスクを表示
             todotext = tk.StringVar()
             todo = tk.Label(self, textvariable=todotext)
-            todo.place(rely=num*0.03+0.35, relx=0.1, relwidth=0.4)
+            todo.place(rely=count*0.03+0.4, relx=0.1, relwidth=0.4)
 
             # 残り時間を表示
             remaintext = tk.StringVar()
             remain = tk.Label(self, textvariable=remaintext)
-            remain.place(rely=num*0.03+0.35, relx=0.5, relwidth=0.2)
+            remain.place(rely=count*0.03+0.4, relx=0.5, relwidth=0.2)
 
             # 新規タスクの削除ボタンを追加
             button = tk.Button(self, text="DONE "+ str(num), highlightbackground='gray')
             button.bind("<Button-1>", self.CompleteToDo)
             button.bind("<Return>", self.CompleteToDo)
-            button.place(rely=num*0.03+0.35, relx=0.7, relwidth=0.1)
+            button.place(rely=count*0.03+0.4, relx=0.7, relwidth=0.1)
 
             # 各タスクのメモ入力ボックスを表示
             memo = tk.Entry(self)
-            memo.place(rely=num*0.03+0.35, relx=0.8, relwidth=0.2)
+            memo.place(rely=count*0.03+0.4, relx=0.8, relwidth=0.2)
 
             # Separatorを表示
             separator = ttk.Separator(self)
-            separator.place(rely=num*0.03+0.35, relx=0, relwidth=1)
+            separator.place(rely=count*0.03+0.4, relx=0, relwidth=1)
 
-            self.todolist.append([num, [project, todo, remain, button, memo, separator], record])
+            self.todolist.append([num, [project, todo, remain, button, memo, separator], records[num]])
 
-            num += 1
+            count += 1
 # ===================================================================================
     def UpdateDynamicWidgetProperty(self):
         for todo in self.todolist:
@@ -192,6 +240,26 @@ class InBoxFrame(tk.Frame):
             text = text[:text.rfind(".")]
             remaintext.set(text)
             todo[1][2].configure(textvariable=remaintext)
+# ===================================================================================
+    def PagePrev(self, event):
+        total = int(self.totalpage.cget('text'))
+        current = int(self.currentpage.get())
+        if 1 < current:
+            current -= 1
+        self.currentpage.delete(0, 'end')
+        self.currentpage.insert(0, str(current))
+        self.InitializeDynamicWidget()
+        self.UpdateStaticWidgetProperty()
+# ===================================================================================
+    def PageNext(self, event):
+        total = int(self.totalpage.cget('text'))
+        current = int(self.currentpage.get())
+        if current < total:
+            current += 1
+        self.currentpage.delete(0, 'end')
+        self.currentpage.insert(0, str(current))
+        self.InitializeDynamicWidget()
+        self.UpdateStaticWidgetProperty()
 # ===================================================================================
     def CompleteToDo(self, event):
         for todo in self.todolist:
@@ -220,6 +288,9 @@ class InBoxFrame(tk.Frame):
                 minute = self.cb7.get()
                 self.tododata.InsertRecordWithDate(project, task, year, month, date, hour, minute)
                 self.memodata.InsertRecordWithDate(project, task, "TODO : "+task)
+                self.InitializeDynamicWidget()
+                self.UpdateStaticWidgetProperty()
+            elif self.currentpage == self.master.focus_get() and self.currentpage.get() != "":
                 self.InitializeDynamicWidget()
                 self.UpdateStaticWidgetProperty()
             else:
