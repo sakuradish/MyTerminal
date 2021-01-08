@@ -208,7 +208,6 @@ class InBoxFrame(tk.Frame):
         records = []
         for todo in self.todolist:
             if todo['record']['data']['state'] == "OPEN":
-                print('OPEN state')
                 records.append(todo)
         recordnum = len(records)
 

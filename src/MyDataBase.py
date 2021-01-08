@@ -108,19 +108,18 @@ class MyDataBase():
                 data[column] = record.split("\t")[self.datacolumns.index(column) + len(self.logcolumns)]
             ret.append({'index':index, 'log':log, 'data':data})
             index += 1
-        return ret
-        # if not sort:
-        # else:
-        #     index = self.datacolumns.index(sort)
-        #     sorted = []
-        #     records = open(self.filepath, 'r', encoding='utf-8').readlines()
-        #     sortitems = [record.split("\t")[index + 3] for record in records]
-        #     sortitems = list(dict.fromkeys(sortitems))
-        #     for item in sortitems:
-        #         for record in records:
-        #             if record.split("\t")[index + 3] == item:
-        #                 sorted.append(record)
-        #     return sorted
+        if not sort:
+            return ret
+        else:
+            sorted = []
+            sortitems = [record['data'][sort] for record in ret]
+            sortitems = list(dict.fromkeys(sortitems))
+            print(sortitems)
+            for item in sortitems:
+                for record in ret:
+                    if record['data'][sort] == item:
+                        sorted.append(record)
+            return sorted
 # ===================================================================================
     def AddOnUpdateCallback(self, callback):
         self.callbacks.append(callback)
