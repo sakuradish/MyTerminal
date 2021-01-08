@@ -96,46 +96,53 @@ class AttendanceFrame(tk.Frame):
         if event.keysym == 'Return':
             if (self.cb5 == self.master.focus_get() or self.cb6 == self.master.focus_get()) and \
                self.cb5.get() != "" and self.cb6.get() != "":
-                self.attendancedata.InsertRecordWithDate(self.cb1.get(),self.cb2.get(),self.cb3.get(),self.cb4.get(),self.cb5.get(),self.cb6.get())
+                self.attendancedata.InsertRecordWithLogInfo([self.cb1.get(),self.cb2.get(),self.cb3.get(),self.cb4.get(),self.cb5.get(),self.cb6.get()])
                 self.UpdateData()
 # ===================================================================================
     def UpdateData(self):
-        self.text.configure(state='normal')
-        self.text.delete('1.0','end')
-        for record in self.attendancedata.GetAllRecords():
-            self.text.insert('end',record)
-        self.text.see('end')
-        self.text.configure(state='disabled')
-        # combobox1
-        records = self.attendancedata.GetAllRecordsByColumn('year')
-        records = list(dict.fromkeys(records))
-        self.cb1.configure(values=records)
-        self.cb1.set(self.attendancedata.GetLastRecordsByColumn('year'))
-        # combobox2
-        records = self.attendancedata.GetAllRecordsByColumn('month')
-        records = list(dict.fromkeys(records))
-        self.cb2.configure(values=records)
-        self.cb2.set(self.attendancedata.GetLastRecordsByColumn('month'))
-        # combobox3
-        records = self.attendancedata.GetAllRecordsByColumn('date')
-        records = list(dict.fromkeys(records))
-        self.cb3.configure(values=records)
-        self.cb3.set(self.attendancedata.GetLastRecordsByColumn('date'))
-        # combobox4
-        records = self.attendancedata.GetAllRecordsByColumn('weekday')
-        records = list(dict.fromkeys(records))
-        self.cb4.configure(values=records)
-        self.cb4.set(self.attendancedata.GetLastRecordsByColumn('weekday'))
-        # combobox5
-        records = self.attendancedata.GetAllRecordsByColumn('type')
-        records = list(dict.fromkeys(records))
-        self.cb5.configure(values=records)
-        self.cb5.set("")
-        # combobox6
-        records = self.attendancedata.GetAllRecordsByColumn('time')
-        records = list(dict.fromkeys(records))
-        self.cb6.configure(values=records)
-        self.cb6.set("")
+        if self.attendancedata.GetAllRecords():
+            self.text.configure(state='normal')
+            self.text.delete('1.0','end')
+            for record in self.attendancedata.GetAllRecords():
+                self.text.insert('end', self.attendancedata.ConvertRecordToString(record) + "\n")
+            self.text.see('end')
+            self.text.configure(state='disabled')
+            # combobox1
+            records = self.attendancedata.GetAllRecordsByColumn('year')
+            records = [record['data']['year'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb1.configure(values=records)
+            self.cb1.set(self.attendancedata.GetLastRecordsByColumn('year')['data']['year'])
+            # combobox2
+            records = self.attendancedata.GetAllRecordsByColumn('month')
+            records = [record['data']['month'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb2.configure(values=records)
+            self.cb2.set(self.attendancedata.GetLastRecordsByColumn('month')['data']['month'])
+            # combobox3
+            records = self.attendancedata.GetAllRecordsByColumn('date')
+            records = [record['data']['date'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb3.configure(values=records)
+            self.cb3.set(self.attendancedata.GetLastRecordsByColumn('date')['data']['date'])
+            # combobox4
+            records = self.attendancedata.GetAllRecordsByColumn('weekday')
+            records = [record['data']['weekday'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb4.configure(values=records)
+            self.cb4.set(self.attendancedata.GetLastRecordsByColumn('weekday')['data']['weekday'])
+            # combobox5
+            records = self.attendancedata.GetAllRecordsByColumn('type')
+            records = [record['data']['type'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb5.configure(values=records)
+            self.cb5.set("")
+            # combobox6
+            records = self.attendancedata.GetAllRecordsByColumn('time')
+            records = [record['data']['time'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb6.configure(values=records)
+            self.cb6.set("")
 # ===================================================================================
 if __name__ == '__main__':
     # ウィンドウ作成

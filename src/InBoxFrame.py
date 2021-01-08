@@ -125,55 +125,91 @@ class InBoxFrame(tk.Frame):
         self.next.place(relx=0.75,rely=0.35,relwidth=0.25,relheight=0.05)
 # ===================================================================================
     def UpdateStaticWidgetProperty(self):
-        # combobox1
-        records = self.memodata.GetAllRecordsByColumn('project')
-        records = list(dict.fromkeys(records))
-        self.cb1.configure(values=records)
-        self.cb1.set(self.memodata.GetLastRecordsByColumn('project'))
-        # combobox1
-        records = self.tododata.GetAllRecordsByColumn('todo')
-        records = list(dict.fromkeys(records))
-        self.cb2.configure(values=records)
-        self.cb2.set("")
-        # combobox3
-        records = self.tododata.GetAllRecordsByColumn('year')
-        records = list(dict.fromkeys(records))
-        self.cb3.configure(values=records)
-        self.cb3.set(self.tododata.GetLastRecordsByColumn('year'))
-        # combobox4
-        records = self.tododata.GetAllRecordsByColumn('month')
-        records = list(dict.fromkeys(records))
-        self.cb4.configure(values=records)
-        self.cb4.set(self.tododata.GetLastRecordsByColumn('month'))
-        # combobox5
-        records = self.tododata.GetAllRecordsByColumn('date')
-        records = list(dict.fromkeys(records))
-        self.cb5.configure(values=records)
-        self.cb5.set(self.tododata.GetLastRecordsByColumn('date'))
-        # combobox6
-        records = self.tododata.GetAllRecordsByColumn('hour')
-        records = list(dict.fromkeys(records))
-        self.cb6.configure(values=records)
-        self.cb6.set(self.tododata.GetLastRecordsByColumn('hour'))
-        # combobox7
-        records = self.tododata.GetAllRecordsByColumn('minute')
-        records = list(dict.fromkeys(records))
-        self.cb7.configure(values=records)
-        self.cb7.set(self.tododata.GetLastRecordsByColumn('minute'))
+        if self.tododata.GetAllRecords():
+            # combobox1
+            records = self.tododata.GetAllRecordsByColumn('project')
+            records = [record['data']['project'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb1.configure(values=records)
+            self.cb1.set(self.tododata.GetLastRecordsByColumn('project')['data']['project'])
+            # combobox1
+            records = self.tododata.GetAllRecordsByColumn('todo')
+            records = [record['data']['todo'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb2.configure(values=records)
+            self.cb2.set("")
+            # combobox3
+            records = self.tododata.GetAllRecordsByColumn('year')
+            records = [record['data']['year'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb3.configure(values=records)
+            self.cb3.set(self.tododata.GetLastRecordsByColumn('year')['data']['year'])
+            # combobox4
+            records = self.tododata.GetAllRecordsByColumn('month')
+            records = [record['data']['month'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb4.configure(values=records)
+            self.cb4.set(self.tododata.GetLastRecordsByColumn('month')['data']['month'])
+            # combobox5
+            records = self.tododata.GetAllRecordsByColumn('date')
+            records = [record['data']['date'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb5.configure(values=records)
+            self.cb5.set(self.tododata.GetLastRecordsByColumn('date')['data']['date'])
+            # combobox6
+            records = self.tododata.GetAllRecordsByColumn('hour')
+            records = [record['data']['hour'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb6.configure(values=records)
+            self.cb6.set(self.tododata.GetLastRecordsByColumn('hour')['data']['hour'])
+            # combobox7
+            records = self.tododata.GetAllRecordsByColumn('minute')
+            records = [record['data']['minute'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb7.configure(values=records)
+            self.cb7.set(self.tododata.GetLastRecordsByColumn('minute')['data']['minute'])
 # ===================================================================================
     def InitializeDynamicWidget(self):
         for todo in self.todolist:
-            for widget in todo[1]:
+            for widget in todo['widgets'].values():
                 widget.place_forget()
                 widget.destroy()
         self.todolist = []
-        self.buttonlist = []
+        # リストを更新
+        records = self.tododata.GetAllRecords(sort='project')
+        for record in records:
+            # プロジェクトを表示
+            projecttext = tk.StringVar()
+            project = tk.Label(self, textvariable=projecttext)
+            # タスクを表示
+            todotext = tk.StringVar()
+            todo = tk.Label(self, textvariable=todotext)
+            # 残り時間を表示
+            remaintext = tk.StringVar()
+            remain = tk.Label(self, textvariable=remaintext)
+            # statusを表示
+            statetext = tk.StringVar()
+            status = tk.Label(self, textvariable=statetext)
+            # 新規タスクの削除ボタンを追加
+            button = tk.Button(self, text="DONE" + str(record['index']), highlightbackground='gray')
+            button.bind("<Button-1>", self.CompleteToDo)
+            button.bind("<Return>", self.CompleteToDo)
+            # 各タスクのメモ入力ボックスを表示
+            memo = tk.Entry(self)
+            # Separatorを表示
+            separator = ttk.Separator(self)
+            widgets = {'project':project, 'todo':todo, 'remain':remain, 'button':button, 'memo':memo, 'separator':separator, 'state':status}
+            self.todolist.append({'widgets':widgets, 'record':record})
         self.UpdateDynamicWidgetProperty()
         self.PlaceDynamicWidget()
 # ===================================================================================
     def PlaceDynamicWidget(self):
 
-        records = self.tododata.GetAllRecords(sort='project')
+        records = []
+        for todo in self.todolist:
+            if todo['record']['data']['state'] == "OPEN":
+                print('OPEN state')
+                records.append(todo)
         recordnum = len(records)
 
         totalpage = tk.StringVar()
@@ -183,71 +219,47 @@ class InBoxFrame(tk.Frame):
 
         start = (int(self.currentpage.get())-1) * self.itemnum
         end = start + self.itemnum
-
+        if len(records) <= end:
+            end = len(records)
         count = 1
         for num in range(start, end, 1):
-            if len(records) <= num:
-                break
-
             # プロジェクトを表示
-            projecttext = tk.StringVar()
-            project = tk.Label(self, textvariable=projecttext)
-            project.place(rely=count*0.03+0.4, relx=0, relwidth=0.1)
-
+            records[num]['widgets']['project'].place(rely=count*0.03+0.4, relx=0, relwidth=0.1)
             # タスクを表示
-            todotext = tk.StringVar()
-            todo = tk.Label(self, textvariable=todotext)
-            todo.place(rely=count*0.03+0.4, relx=0.1, relwidth=0.4)
-
+            records[num]['widgets']['todo'].place(rely=count*0.03+0.4, relx=0.1, relwidth=0.4)
             # 残り時間を表示
-            remaintext = tk.StringVar()
-            remain = tk.Label(self, textvariable=remaintext)
-            remain.place(rely=count*0.03+0.4, relx=0.5, relwidth=0.15)
-
-            # statusを表示
-            statustext = tk.StringVar()
-            status = tk.Label(self, textvariable=statustext)
-            status.place(rely=count*0.03+0.4, relx=0.65, relwidth=0.05)
-
+            records[num]['widgets']['remain'].place(rely=count*0.03+0.4, relx=0.5, relwidth=0.15)
+            # stateを表示
+            records[num]['widgets']['state'].place(rely=count*0.03+0.4, relx=0.65, relwidth=0.05)
             # 新規タスクの削除ボタンを追加
-            button = tk.Button(self, text="DONE "+ str(num), highlightbackground='gray')
-            button.bind("<Button-1>", self.CompleteToDo)
-            button.bind("<Return>", self.CompleteToDo)
-            button.place(rely=count*0.03+0.4, relx=0.7, relwidth=0.1)
-
+            records[num]['widgets']['button'].place(rely=count*0.03+0.4, relx=0.7, relwidth=0.1)
             # 各タスクのメモ入力ボックスを表示
-            memo = tk.Entry(self)
-            memo.place(rely=count*0.03+0.4, relx=0.8, relwidth=0.2)
-
+            records[num]['widgets']['memo'].place(rely=count*0.03+0.4, relx=0.8, relwidth=0.2)
             # Separatorを表示
-            separator = ttk.Separator(self)
-            separator.place(rely=count*0.03+0.4, relx=0, relwidth=1)
-
-            self.todolist.append([num, [project, todo, remain, button, memo, separator, status], records[num]])
-
+            records[num]['widgets']['separator'].place(rely=count*0.03+0.4, relx=0, relwidth=1)
             count += 1
 # ===================================================================================
     def UpdateDynamicWidgetProperty(self):
         for todo in self.todolist:
             projecttext = tk.StringVar()
-            projecttext.set(todo[2].split("\t")[3])
-            todo[1][0].configure(textvariable=projecttext)
+            projecttext.set(todo['record']['data']['project'])
+            todo['widgets']['project'].configure(textvariable=projecttext)
             todotext = tk.StringVar()
-            todotext.set(todo[2].split("\t")[4])
-            todo[1][1].configure(textvariable=todotext)
+            todotext.set(todo['record']['data']['todo'])
+            todo['widgets']['todo'].configure(textvariable=todotext)
             remaintext = tk.StringVar()
-            year = int(todo[2].split("\t")[5])
-            month = int(todo[2].split("\t")[6])
-            date = int(todo[2].split("\t")[7])
-            hour = int(todo[2].split("\t")[8])
-            minute = int(todo[2].split("\t")[9])
+            year = int(todo['record']['data']['year'])
+            month = int(todo['record']['data']['month'])
+            date = int(todo['record']['data']['date'])
+            hour =int(todo['record']['data']['hour'])
+            minute = int(todo['record']['data']['minute'])
             text = str(datetime.datetime(year, month, date, hour, minute, 0) - datetime.datetime.now())
             text = text[:text.rfind(".")]
             remaintext.set(text)
-            todo[1][2].configure(textvariable=remaintext)
-            statustext = tk.StringVar()
-            statustext.set(todo[2].split("\t")[10])
-            todo[1][6].configure(textvariable=statustext)
+            todo['widgets']['remain'].configure(textvariable=remaintext)
+            statetext = tk.StringVar()
+            statetext.set(todo['record']['data']['state'])
+            todo['widgets']['state'].configure(textvariable=statetext)
 # ===================================================================================
     def PagePrev(self, event):
         total = int(self.totalpage.cget('text'))
@@ -271,20 +283,19 @@ class InBoxFrame(tk.Frame):
 # ===================================================================================
     def CompleteToDo(self, event):
         for todo in self.todolist:
-            if todo[1][3] == event.widget:
-                deletenum = todo[0]
-        index = deletenum-1
-        project = self.tododata.GetAllRecordsByColumn('project')[index]
-        todo = self.tododata.GetAllRecordsByColumn('todo')[index]
-        year = self.tododata.GetAllRecordsByColumn('year')[index]
-        month = self.tododata.GetAllRecordsByColumn('month')[index]
-        date = self.tododata.GetAllRecordsByColumn('date')[index]
-        hour = self.tododata.GetAllRecordsByColumn('hour')[index]
-        minute = self.tododata.GetAllRecordsByColumn('minute')[index]
-        # self.memodata.InsertRecordWithDate(project[index],todo[index],"DONE : "+todo[index])
+            if todo['widgets']['button'] == event.widget:
+                index = todo['record']['index']
+        project = self.tododata.GetAllRecordsByColumn('project')[index]['data']['project']
+        todo = self.tododata.GetAllRecordsByColumn('todo')[index]['data']['todo']
+        year = self.tododata.GetAllRecordsByColumn('year')[index]['data']['year']
+        month = self.tododata.GetAllRecordsByColumn('month')[index]['data']['month']
+        date = self.tododata.GetAllRecordsByColumn('date')[index]['data']['date']
+        hour = self.tododata.GetAllRecordsByColumn('hour')[index]['data']['hour']
+        minute = self.tododata.GetAllRecordsByColumn('minute')[index]['data']['minute']
+        # self.memodata.InsertRecordWithLogInfo(project[index],todo[index],"DONE : "+todo[index])
         self.tododata.DeleteRecordByIndex(index)
-        self.tododata.InsertRecordWithDate(project,todo,year,month,date,hour,minute,"DONE")
-        self.tasklog.InsertRecordWithDate(project,todo,"DONE")
+        self.tododata.InsertRecordWithLogInfo([project,todo,year,month,date,hour,minute,"DONE"])
+        self.tasklog.InsertRecordWithLogInfo([project,todo,"DONE"])
         self.InitializeDynamicWidget()
 # ===================================================================================
     def OnTick(self):
@@ -300,8 +311,8 @@ class InBoxFrame(tk.Frame):
                 date = self.cb5.get()
                 hour = self.cb6.get()
                 minute = self.cb7.get()
-                self.tododata.InsertRecordWithDate(project, task, year, month, date, hour, minute, "OPEN")
-                self.tasklog.InsertRecordWithDate(project,task,"OPEN")
+                self.tododata.InsertRecordWithLogInfo([project, task, year, month, date, hour, minute, "OPEN"])
+                self.tasklog.InsertRecordWithLogInfo([project,task,"OPEN"])
                 self.InitializeDynamicWidget()
                 self.UpdateStaticWidgetProperty()
             elif self.currentpage == self.master.focus_get() and self.currentpage.get() != "":
@@ -309,12 +320,13 @@ class InBoxFrame(tk.Frame):
                 self.UpdateStaticWidgetProperty()
             else:
                 for todo in self.todolist:
-                    if todo[1][4] == self.master.focus_get() and todo[1][4].get() != "":
-                        index = todo[0] -1
-                        lines = self.tododata.GetAllRecordsByColumn('todo')
-                        projects = self.tododata.GetAllRecordsByColumn('project')
-                        self.memodata.InsertRecordWithDate(projects[index], lines[index], todo[1][4].get())
-                        todo[1][4].delete(0,'end')
+                    if todo['widgets']['memo'] == self.master.focus_get() and todo['widgets']['memo'].get() != "":
+                        index = todo['record']['index']
+                        project = self.tododata.GetAllRecordsByColumn('project')[index]['data']['project']
+                        task = self.tododata.GetAllRecordsByColumn('todo')[index]['data']['todo']
+                        memo = todo['widgets']['memo'].get()
+                        self.memodata.InsertRecordWithLogInfo([project, task, memo])
+                        todo['widgets']['memo'].delete(0,'end')
 # ===================================================================================
 if __name__ == '__main__':
     # ウィンドウ作成

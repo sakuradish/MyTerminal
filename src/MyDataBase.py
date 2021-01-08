@@ -6,7 +6,8 @@ import shutil
 class MyDataBase():
     def __init__(self, filepath, columns):
         self.filepath = filepath
-        self.columns = columns
+        self.logcolumns = ['date', 'weekday', 'time']
+        self.datacolumns = columns
         self.callbacks = []
         if not os.path.exists(self.filepath):
             if not os.path.exists(os.path.dirname(self.filepath)):
@@ -23,46 +24,51 @@ class MyDataBase():
         if not os.path.exists(file):
             shutil.copy2(self.filepath, file)
 # ===================================================================================
-    def InsertRecordWithDate(self, *records):
-        print(records)
+    def InsertRecordWithLogInfo(self, records):
+        if len(records) != len(self.datacolumns):
+            print("input records is not matching")
+        temprecords = []
+        dt = datetime.datetime.now()
+        temprecords.append(dt.strftime("%Y/%m/%d"))
+        temprecords.append(dt.strftime('%a'))
+        temprecords.append(dt.strftime('%X'))
+        temprecords += records
+        self.InsertRecord(temprecords)
+# ===================================================================================
+    def InsertRecord(self, records):
         with open(self.filepath, 'a', encoding='utf-8') as f:
-            dt = datetime.datetime.now()
-            f.write(dt.strftime("%Y/%m/%d"))
-            f.write("\t" + dt.strftime('%a'))
-            f.write("\t" + dt.strftime('%X'))
-            for i in range(0, len(self.columns), 1):
-                f.write("\t" + records[i].replace("\n", ""))
+            for record in records:
+                if records.index(record) == 0:
+                    f.write(record.replace("\n", ""))
+                else:
+                    f.write("\t" + record.replace("\n", ""))
             f.write("\n")
         self.OnUpdate()
 # ===================================================================================
-    def InsertRecord(self, record):
-        with open(self.filepath, 'a', encoding='utf-8') as f:
-            f.write(record.replace("\n", "") + "\n")
-# ===================================================================================
-    def DeleteAllRecords(self):
-        os.remove(self.filepath)
-# ===================================================================================
-    # def DeleteRecordByData(self, column, data):
-    #     index = self.columns.index(column)
-    #     records = self.GetAllRecords()
-    #     self.DeleteAllRecords()
-    #     for record in records:
-    #         if record.split("\t")[index + 3] != data:
-    #             self.InsertRecord(record)
-    #     self.OnUpdate()
-# ===================================================================================
     def DeleteRecordByIndex(self, index):
         records = self.GetAllRecords()
-        self.DeleteAllRecords()
-        for record in records:
-            if record.split("\t")[0] != records[index].split("\t")[0] \
-               or record.split("\t")[1] != records[index].split("\t")[1] \
-               or record.split("\t")[2] != records[index].split("\t")[2]:
-                self.InsertRecord(record)
+        del records[index]
+        with open(self.filepath, 'w', encoding='utf-8') as f:
+            for record in records:
+                f.write(self.ConvertRecordToString(record) + "\n")
         self.OnUpdate()
 # ===================================================================================
-    def GetColumns(self):
-        return self.columns
+    def ConvertRecordToString(self, record, log=True, data=True):
+        ret = ""
+        texts = []
+        if log:
+            texts.append(record['log']['date'])
+            texts.append(record['log']['weekday'])
+            texts.append(record['log']['time'])
+        if data:
+            for column in self.datacolumns:
+                texts.append(record['data'][column])
+        for text in texts:
+            if texts.index(text) == 0:
+                ret += text
+            else:
+                ret += "\t" + text
+        return ret
 # ===================================================================================
     def GetLastRecordsByColumn(self, column):
         records = self.GetAllRecordsByColumn(column)
@@ -72,13 +78,14 @@ class MyDataBase():
             return ""
 # ===================================================================================
     def GetAllRecordsByColumn(self, column):
-        if column in self.columns:
-            index = self.columns.index(column)
-            records = self.GetAllRecords()
-            filtered = [record.split("\t")[index + 3] for record in records]
-            return filtered
-        else:
-            return self.GetAllRecords()
+        ret = []
+        records = self.GetAllRecords()
+        for record in records:
+            index = record['index']
+            data = {}
+            data[column] = record['data'][column]
+            ret.append({'index':index, 'data':data})
+        return ret
 # ===================================================================================
     def GetLastRecords(self):
         records = self.GetAllRecords()
@@ -88,19 +95,32 @@ class MyDataBase():
             return ""
 # ===================================================================================
     def GetAllRecords(self, sort=""):
-        if not sort:
-            return open(self.filepath, 'r', encoding='utf-8').readlines()
-        else:
-            index = self.columns.index(sort)
-            sorted = []
-            records = open(self.filepath, 'r', encoding='utf-8').readlines()
-            sortitems = [record.split("\t")[index + 3] for record in records]
-            sortitems = list(dict.fromkeys(sortitems))
-            for item in sortitems:
-                for record in records:
-                    if record.split("\t")[index + 3] == item:
-                        sorted.append(record)
-            return sorted
+        ret = []
+        records = open(self.filepath, 'r', encoding='utf-8').readlines()
+        index = 0
+        for record in records:
+            record = record.replace("\n", "")
+            log = {}
+            for column in self.logcolumns:
+                log[column] = record.split("\t")[self.logcolumns.index(column)]
+            data = {}
+            for column in self.datacolumns:
+                data[column] = record.split("\t")[self.datacolumns.index(column) + len(self.logcolumns)]
+            ret.append({'index':index, 'log':log, 'data':data})
+            index += 1
+        return ret
+        # if not sort:
+        # else:
+        #     index = self.datacolumns.index(sort)
+        #     sorted = []
+        #     records = open(self.filepath, 'r', encoding='utf-8').readlines()
+        #     sortitems = [record.split("\t")[index + 3] for record in records]
+        #     sortitems = list(dict.fromkeys(sortitems))
+        #     for item in sortitems:
+        #         for record in records:
+        #             if record.split("\t")[index + 3] == item:
+        #                 sorted.append(record)
+        #     return sorted
 # ===================================================================================
     def AddOnUpdateCallback(self, callback):
         self.callbacks.append(callback)
@@ -110,10 +130,16 @@ class MyDataBase():
             callback()
 # ===================================================================================
 if __name__ == '__main__':
-    memodata = MyDataBase("memo.txt", ['project', 'task', 'memo'])
-    memodata.InsertRecordWithDate('project', 'task', 'memo')
+    memodata = MyDataBase("../data/memo.txt", ['project', 'task', 'memo'])
+    memodata.InsertRecordWithLogInfo(['project1', 'task1 to be deleted', 'memo'])
+    memodata.InsertRecordWithLogInfo(['project2', 'task2', 'test'])
+    print("=================================")
     print(memodata.GetAllRecords())
-    print(memodata.GetAllRecordsByColumn('project'))
+    print("=================================")
+    memodata.DeleteRecordByIndex(0)
+    print(memodata.GetAllRecords())
+    print("=================================")
+    print(memodata.GetAllRecordsByColumn('memo'))
     print(memodata.GetLastRecords())
     print(memodata.GetLastRecordsByColumn('project'))
     input("press any key ...")

@@ -70,8 +70,6 @@ class MemoFrame(tk.Frame):
             if self.cb1 == self.master.focus_get() or \
                self.cb2 == self.master.focus_get() or \
                self.cb3 == self.master.focus_get():
-            #     self.memodata.InsertRecordWithDate(self.cb1.get(),self.cb2.get(),self.cb3.get())
-            #     self.cb3.set("")
                 self.UpdateText()
 # ===================================================================================
     def UpdateText(self):
@@ -79,21 +77,24 @@ class MemoFrame(tk.Frame):
         self.text.delete('1.0','end')
         for record in self.memodata.GetAllRecords():
             # self.master.update()
-            if record.split("\t")[3].find(self.cb1.get()) != -1 and \
-               record.split("\t")[4].find(self.cb2.get()) != -1 and \
-               record.split("\t")[5].find(self.cb3.get()) != -1:
-                self.text.insert('end',record)
+            if record['data']['project'].find(self.cb1.get()) != -1 and \
+               record['data']['task'].find(self.cb2.get()) != -1 and \
+               record['data']['memo'].find(self.cb3.get()) != -1:
+                self.text.insert('end', self.memodata.ConvertRecordToString(record) + "\n")
         self.text.see('end')
         self.text.configure(state='disabled')
         records = self.memodata.GetAllRecordsByColumn('project')
+        records = [record['data']['project'] for record in records]
         records = list(dict.fromkeys(records))
         self.cb1.configure(values=records)
         # self.cb1.set("")
         records = self.tododata.GetAllRecordsByColumn('todo')
+        records = [record['data']['todo'] for record in records]
         records = list(dict.fromkeys(records))
         self.cb2.configure(values=records)
         # self.cb2.set("")
         records = self.memodata.GetAllRecordsByColumn('memo')
+        records = [record['data']['memo'] for record in records]
         records = list(dict.fromkeys(records))
         self.cb3.configure(values=records)
         # self.cb3.set("")
@@ -107,7 +108,7 @@ if __name__ == '__main__':
 
     framecompose = ComposeFrame(root)
     memodata = MyDataBase("../data/memo.txt", ['project', 'task', 'memo'])
-    tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date'])
+    tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date', 'hour', 'minute', 'state'])
     memoframe = MemoFrame(root, memodata, tododata)
     framecompose.AddFrame(memoframe, 'memoframe', key=memoframe.OnKeyEvent)
 
