@@ -16,7 +16,7 @@ if __name__ == '__main__':
     # database
     memodata = MyDataBase("../data/memo.txt", ['project', 'task', 'memo'])
     tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date', 'hour', 'minute', 'state'])
-    tasklog = MyDataBase("../data/done.txt", ['project', 'task', 'state'])
+    tasklog = MyDataBase("../data/tasklog.txt", ['project', 'task', 'state'])
     attendancedata = MyDataBase("../data/attendance.txt", ['year', 'month', 'date', 'weekday', 'type', 'time'])
     # memoframe
     memoframe = MemoFrame(root, memodata, tododata)

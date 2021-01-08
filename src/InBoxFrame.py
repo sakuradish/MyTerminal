@@ -65,6 +65,18 @@ class InBoxFrame(tk.Frame):
         cb7 = ttk.Combobox(self, textvariable=self.v7)
         self.label7 = label7
         self.cb7 = cb7
+        # sort
+        label8 = tk.Label(self, text='sort')
+        self.v8 = tk.StringVar()
+        cb8 = ttk.Combobox(self, textvariable=self.v8)
+        self.label8 = label8
+        self.cb8 = cb8
+        # state
+        label9 = tk.Label(self, text='表示state')
+        self.v8 = tk.StringVar()
+        cb9 = ttk.Combobox(self, textvariable=self.v8)
+        self.label9 = label9
+        self.cb9 = cb9
         # how many item show at one time
         totalpage = tk.Label(self)
         v = tk.StringVar()
@@ -114,15 +126,21 @@ class InBoxFrame(tk.Frame):
         # combobox7
         self.label7.place(relx=0,rely=0.3,relwidth=0.2,relheight=0.05)
         self.cb7.place(relx=0.2,rely=0.3,relwidth=0.8,relheight=0.05)
+        # sort
+        self.label8.place(relx=0.2,rely=0.35,relwidth=0.1,relheight=0.05)
+        self.cb8.place(relx=0.3,rely=0.35,relwidth=0.05,relheight=0.05)
+        # state
+        self.label9.place(relx=0.35,rely=0.35,relwidth=0.1,relheight=0.05)
+        self.cb9.place(relx=0.45,rely=0.35,relwidth=0.05,relheight=0.05)
         # how many item show at one time
-        self.totalpage.place(relx=0,rely=0.35,relwidth=0.1,relheight=0.05)
-        self.pagelavel1.place(relx=0.1,rely=0.35,relwidth=0.15,relheight=0.05)
-        self.currentpage.place(relx=0.25,rely=0.35,relwidth=0.1,relheight=0.05)
-        self.pagelavel2.place(relx=0.35,rely=0.35,relwidth=0.15,relheight=0.05)
+        self.totalpage.place(relx=0.5,rely=0.35,relwidth=0.05,relheight=0.05)
+        self.pagelavel1.place(relx=0.55,rely=0.35,relwidth=0.1,relheight=0.05)
+        self.currentpage.place(relx=0.65,rely=0.35,relwidth=0.05,relheight=0.05)
+        self.pagelavel2.place(relx=0.7,rely=0.35,relwidth=0.1,relheight=0.05)
         # prev page button
-        self.prev.place(relx=0.5,rely=0.35,relwidth=0.25,relheight=0.05)
+        self.prev.place(relx=0.8,rely=0.35,relwidth=0.1,relheight=0.05)
         # next page button
-        self.next.place(relx=0.75,rely=0.35,relwidth=0.25,relheight=0.05)
+        self.next.place(relx=0.9,rely=0.35,relwidth=0.1,relheight=0.05)
 # ===================================================================================
     def UpdateStaticWidgetProperty(self):
         if self.tododata.GetAllRecords():
@@ -168,6 +186,14 @@ class InBoxFrame(tk.Frame):
             records = list(dict.fromkeys(records))
             self.cb7.configure(values=records)
             self.cb7.set(self.tododata.GetLastRecordsByColumn('minute')['data']['minute'])
+            # sort
+            records = self.tododata.GetDataColumns()
+            self.cb8.configure(values=records)
+            # state
+            records = self.tododata.GetAllRecordsByColumn('state')
+            records = [record['data']['state'] for record in records]
+            records = list(dict.fromkeys(records))
+            self.cb9.configure(values=records)
 # ===================================================================================
     def InitializeDynamicWidget(self):
         for todo in self.todolist:
@@ -176,7 +202,10 @@ class InBoxFrame(tk.Frame):
                 widget.destroy()
         self.todolist = []
         # リストを更新
-        records = self.tododata.GetAllRecords(sort='project')
+        sort = self.cb8.get()
+        if sort == "":
+            sort == "project"
+        records = self.tododata.GetAllRecords(sort=sort)
         for record in records:
             # プロジェクトを表示
             projecttext = tk.StringVar()
@@ -190,51 +219,58 @@ class InBoxFrame(tk.Frame):
             # statusを表示
             statetext = tk.StringVar()
             status = tk.Label(self, textvariable=statetext)
-            # 新規タスクの削除ボタンを追加
-            button = tk.Button(self, text="DONE" + str(record['index']), highlightbackground='gray')
-            button.bind("<Button-1>", self.CompleteToDo)
-            button.bind("<Return>", self.CompleteToDo)
+            # OPENボタンを追加
+            openbtn = tk.Button(self, text="OPEN", highlightbackground='gray')
+            openbtn.bind("<Button-1>", self.OnOpenBtn)
+            openbtn.bind("<Return>", self.OnOpenBtn)
+            # DOINGボタンを追加
+            doingbtn = tk.Button(self, text="DOING", highlightbackground='gray')
+            doingbtn.bind("<Button-1>", self.OnDoingBtn)
+            doingbtn.bind("<Return>", self.OnDoingBtn)
+            # DONEボタンを追加
+            donebtn = tk.Button(self, text="DONE", highlightbackground='gray')
+            donebtn.bind("<Button-1>", self.OnDoneBtn)
+            donebtn.bind("<Return>", self.OnDoneBtn)
             # 各タスクのメモ入力ボックスを表示
             memo = tk.Entry(self)
             # Separatorを表示
             separator = ttk.Separator(self)
-            widgets = {'project':project, 'todo':todo, 'remain':remain, 'button':button, 'memo':memo, 'separator':separator, 'state':status}
+            widgets = {'project':project, 'todo':todo, 'remain':remain, 'openbtn':openbtn, 'doingbtn':doingbtn, 'donebtn':donebtn, 'memo':memo, 'separator':separator, 'state':status}
             self.todolist.append({'widgets':widgets, 'record':record})
         self.UpdateDynamicWidgetProperty()
         self.PlaceDynamicWidget()
 # ===================================================================================
     def PlaceDynamicWidget(self):
-
+        # stateがOPENのものだけ表示
         records = []
         for todo in self.todolist:
-            if todo['record']['data']['state'] == "OPEN":
+            state = self.cb9.get()
+            if state == "":
+                state = "DOING"
+            if todo['record']['data']['state'] == state:
                 records.append(todo)
         recordnum = len(records)
-
+        # 最大ページ数の表示をついでに更新
         totalpage = tk.StringVar()
         text = str(math.ceil(recordnum / self.itemnum))
         totalpage.set(text)
         self.totalpage.configure(textvariable=totalpage)
-
+        # 現在ページ向けの開始・終了インデックスを算出
         start = (int(self.currentpage.get())-1) * self.itemnum
         end = start + self.itemnum
         if len(records) <= end:
             end = len(records)
+        # 部品配置
         count = 1
         for num in range(start, end, 1):
-            # プロジェクトを表示
             records[num]['widgets']['project'].place(rely=count*0.03+0.4, relx=0, relwidth=0.1)
-            # タスクを表示
             records[num]['widgets']['todo'].place(rely=count*0.03+0.4, relx=0.1, relwidth=0.4)
-            # 残り時間を表示
             records[num]['widgets']['remain'].place(rely=count*0.03+0.4, relx=0.5, relwidth=0.15)
-            # stateを表示
             records[num]['widgets']['state'].place(rely=count*0.03+0.4, relx=0.65, relwidth=0.05)
-            # 新規タスクの削除ボタンを追加
-            records[num]['widgets']['button'].place(rely=count*0.03+0.4, relx=0.7, relwidth=0.1)
-            # 各タスクのメモ入力ボックスを表示
+            records[num]['widgets']['openbtn'].place(rely=count*0.03+0.4, relx=0.7, relwidth=0.03)
+            records[num]['widgets']['doingbtn'].place(rely=count*0.03+0.4, relx=0.73, relwidth=0.03)
+            records[num]['widgets']['donebtn'].place(rely=count*0.03+0.4, relx=0.76, relwidth=0.03)
             records[num]['widgets']['memo'].place(rely=count*0.03+0.4, relx=0.8, relwidth=0.2)
-            # Separatorを表示
             records[num]['widgets']['separator'].place(rely=count*0.03+0.4, relx=0, relwidth=1)
             count += 1
 # ===================================================================================
@@ -280,9 +316,45 @@ class InBoxFrame(tk.Frame):
             self.InitializeDynamicWidget()
             self.UpdateStaticWidgetProperty()
 # ===================================================================================
-    def CompleteToDo(self, event):
+    def OnOpenBtn(self, event):
         for todo in self.todolist:
-            if todo['widgets']['button'] == event.widget:
+            if todo['widgets']['openbtn'] == event.widget:
+                index = todo['record']['index']
+        project = self.tododata.GetAllRecordsByColumn('project')[index]['data']['project']
+        todo = self.tododata.GetAllRecordsByColumn('todo')[index]['data']['todo']
+        year = self.tododata.GetAllRecordsByColumn('year')[index]['data']['year']
+        month = self.tododata.GetAllRecordsByColumn('month')[index]['data']['month']
+        date = self.tododata.GetAllRecordsByColumn('date')[index]['data']['date']
+        hour = self.tododata.GetAllRecordsByColumn('hour')[index]['data']['hour']
+        minute = self.tododata.GetAllRecordsByColumn('minute')[index]['data']['minute']
+        # self.memodata.InsertRecordWithLogInfo(project[index],todo[index],"DONE : "+todo[index])
+        self.tododata.DeleteRecordByIndex(index)
+        self.tododata.InsertRecordWithLogInfo([project,todo,year,month,date,hour,minute,"OPEN"])
+        self.tasklog.InsertRecordWithLogInfo([project,todo,"OPEN"])
+        self.UpdateStaticWidgetProperty()
+        self.InitializeDynamicWidget()
+# ===================================================================================
+    def OnDoingBtn(self, event):
+        for todo in self.todolist:
+            if todo['widgets']['doingbtn'] == event.widget:
+                index = todo['record']['index']
+        project = self.tododata.GetAllRecordsByColumn('project')[index]['data']['project']
+        todo = self.tododata.GetAllRecordsByColumn('todo')[index]['data']['todo']
+        year = self.tododata.GetAllRecordsByColumn('year')[index]['data']['year']
+        month = self.tododata.GetAllRecordsByColumn('month')[index]['data']['month']
+        date = self.tododata.GetAllRecordsByColumn('date')[index]['data']['date']
+        hour = self.tododata.GetAllRecordsByColumn('hour')[index]['data']['hour']
+        minute = self.tododata.GetAllRecordsByColumn('minute')[index]['data']['minute']
+        # self.memodata.InsertRecordWithLogInfo(project[index],todo[index],"DONE : "+todo[index])
+        self.tododata.DeleteRecordByIndex(index)
+        self.tododata.InsertRecordWithLogInfo([project,todo,year,month,date,hour,minute,"DOING"])
+        self.tasklog.InsertRecordWithLogInfo([project,todo,"DOING"])
+        self.UpdateStaticWidgetProperty()
+        self.InitializeDynamicWidget()
+# ===================================================================================
+    def OnDoneBtn(self, event):
+        for todo in self.todolist:
+            if todo['widgets']['donebtn'] == event.widget:
                 index = todo['record']['index']
         project = self.tododata.GetAllRecordsByColumn('project')[index]['data']['project']
         todo = self.tododata.GetAllRecordsByColumn('todo')[index]['data']['todo']
@@ -295,6 +367,7 @@ class InBoxFrame(tk.Frame):
         self.tododata.DeleteRecordByIndex(index)
         self.tododata.InsertRecordWithLogInfo([project,todo,year,month,date,hour,minute,"DONE"])
         self.tasklog.InsertRecordWithLogInfo([project,todo,"DONE"])
+        self.UpdateStaticWidgetProperty()
         self.InitializeDynamicWidget()
 # ===================================================================================
     def OnTick(self):
@@ -312,9 +385,16 @@ class InBoxFrame(tk.Frame):
                 minute = self.cb7.get()
                 self.tododata.InsertRecordWithLogInfo([project, task, year, month, date, hour, minute, "OPEN"])
                 self.tasklog.InsertRecordWithLogInfo([project,task,"OPEN"])
+                self.cb9.set("OPEN")
                 self.InitializeDynamicWidget()
                 self.UpdateStaticWidgetProperty()
             elif self.currentpage == self.master.focus_get() and self.currentpage.get() != "":
+                self.InitializeDynamicWidget()
+                self.UpdateStaticWidgetProperty()
+            elif self.cb8 == self.master.focus_get() and self.cb8.get() != "":
+                self.InitializeDynamicWidget()
+                self.UpdateStaticWidgetProperty()
+            elif self.cb9 == self.master.focus_get() and self.cb9.get() != "":
                 self.InitializeDynamicWidget()
                 self.UpdateStaticWidgetProperty()
             else:
@@ -337,7 +417,7 @@ if __name__ == '__main__':
     framecompose = ComposeFrame(root)
     memodata = MyDataBase("../data/memo.txt", ['project', 'task', 'memo'])
     tododata = MyDataBase("../data/todo.txt", ['project', 'todo', 'year', 'month', 'date', 'hour', 'minute', 'state'])
-    tasklog = MyDataBase("../data/done.txt", ['project', 'task', 'state'])
+    tasklog = MyDataBase("../data/tasklog.txt", ['project', 'task', 'state'])
     inboxframe = InBoxFrame(root, memodata, tododata, tasklog)
     framecompose.AddFrame(inboxframe, 'inboxframe', key=inboxframe.OnKeyEvent, time=inboxframe.OnTick)
 

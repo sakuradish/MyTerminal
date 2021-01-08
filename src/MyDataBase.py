@@ -24,6 +24,9 @@ class MyDataBase():
         if not os.path.exists(file):
             shutil.copy2(self.filepath, file)
 # ===================================================================================
+    def GetDataColumns(self):
+        return self.datacolumns
+# ===================================================================================
     def InsertRecordWithLogInfo(self, records):
         if len(records) != len(self.datacolumns):
             print("input records is not matching")
@@ -108,13 +111,12 @@ class MyDataBase():
                 data[column] = record.split("\t")[self.datacolumns.index(column) + len(self.logcolumns)]
             ret.append({'index':index, 'log':log, 'data':data})
             index += 1
-        if not sort:
+        if sort == "":
             return ret
         else:
             sorted = []
             sortitems = [record['data'][sort] for record in ret]
             sortitems = list(dict.fromkeys(sortitems))
-            print(sortitems)
             for item in sortitems:
                 for record in ret:
                     if record['data'][sort] == item:
