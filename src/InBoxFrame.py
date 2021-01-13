@@ -383,9 +383,12 @@ class InBoxFrame(tk.Frame):
                 date = self.cb5.get()
                 hour = self.cb6.get()
                 minute = self.cb7.get()
-                self.tododata.InsertRecordWithLogInfo([project, task, year, month, date, hour, minute, "OPEN"])
-                self.tasklog.InsertRecordWithLogInfo([project,task,"OPEN"])
-                self.cb9.set("OPEN")
+                state = self.cb9.get()
+                if state == "":
+                    state = "DOING"
+                self.tododata.InsertRecordWithLogInfo([project, task, year, month, date, hour, minute, state])
+                self.tasklog.InsertRecordWithLogInfo([project,task,state])
+                # self.cb9.set("OPEN")
                 self.InitializeDynamicWidget()
                 self.UpdateStaticWidgetProperty()
             elif self.currentpage == self.master.focus_get() and self.currentpage.get() != "":
