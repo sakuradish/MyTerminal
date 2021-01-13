@@ -8,6 +8,7 @@ import tkinter as tk
 from tkinter import font
 from tkinter import ttk
 from PIL import Image, ImageTk
+import os
 import time
 import math
 # ===================================================================================
@@ -407,6 +408,8 @@ class InBoxFrame(tk.Frame):
                         project = self.tododata.GetAllRecordsByColumn('project')[index]['data']['project']
                         task = self.tododata.GetAllRecordsByColumn('todo')[index]['data']['todo']
                         memo = todo['widgets']['memo'].get()
+                        if os.path.exists(memo) or memo.find("http") != -1:
+                            os.system("start " + memo)
                         self.memodata.InsertRecordWithLogInfo([project, task, memo])
                         todo['widgets']['memo'].delete(0,'end')
 # ===================================================================================
