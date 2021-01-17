@@ -127,7 +127,7 @@ class MyDataBase():
             for record in ret:
                 isMatched = True
                 for k,v in filter.items():
-                    if not record['data'][k].find(v) != -1:
+                    if not v.lower() in record['data'][k].lower():
                         isMatched = False
                         break
                 if isMatched:
