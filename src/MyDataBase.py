@@ -73,16 +73,16 @@ class MyDataBase():
                 ret += "\t" + text
         return ret
 # ===================================================================================
-    def GetLastRecordsByColumn(self, column):
-        records = self.GetAllRecordsByColumn(column)
+    def GetLastRecordsByColumn(self, column, sort="", filter={}):
+        records = self.GetAllRecordsByColumn(column, sort=sort, filter=filter)
         if records:
             return records[-1]
         else:
             return ""
 # ===================================================================================
-    def GetAllRecordsByColumn(self, column):
+    def GetAllRecordsByColumn(self, column, sort="", filter={}):
         ret = []
-        records = self.GetAllRecords()
+        records = self.GetAllRecords(sort=sort, filter=filter)
         for record in records:
             index = record['index']
             data = {}
@@ -90,14 +90,14 @@ class MyDataBase():
             ret.append({'index':index, 'data':data})
         return ret
 # ===================================================================================
-    def GetLastRecords(self):
-        records = self.GetAllRecords()
+    def GetLastRecords(self, sort="", filter={}):
+        records = self.GetAllRecords(sort=sort, filter=filter)
         if records:
             return records[-1]
         else:
             return ""
 # ===================================================================================
-    def GetAllRecords(self, sort=""):
+    def GetAllRecords(self, sort="", filter={}):
         ret = []
         records = open(self.filepath, 'r', encoding='utf-8').readlines()
         index = 0
@@ -111,9 +111,7 @@ class MyDataBase():
                 data[column] = record.split("\t")[self.datacolumns.index(column) + len(self.logcolumns)]
             ret.append({'index':index, 'log':log, 'data':data})
             index += 1
-        if sort == "":
-            return ret
-        else:
+        if sort != "":
             sorted = []
             sortitems = [record['data'][sort] for record in ret]
             sortitems = list(dict.fromkeys(sortitems))
@@ -121,7 +119,20 @@ class MyDataBase():
                 for record in ret:
                     if record['data'][sort] == item:
                         sorted.append(record)
-            return sorted
+            ret = sorted
+        # filter={'category':'趣味'}
+        if filter:
+            filtered = []
+            for record in ret:
+                isMatched = True
+                for k,v in filter.items():
+                    if record['data'][k] != v:
+                        isMatched = False
+                        break
+                if isMatched:
+                    filtered.append(record)
+            ret = filtered
+        return ret
 # ===================================================================================
     def AddOnUpdateCallback(self, callback):
         self.callbacks.append(callback)
