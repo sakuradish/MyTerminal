@@ -11,9 +11,9 @@ from PIL import Image, ImageTk
 import time
 # ===================================================================================
 class AccountBookFrame(tk.Frame):
-    def __init__(self,master, memodata, cnf={},**kw):
+    def __init__(self,master, accountbookdata, cnf={},**kw):
         super().__init__(master,cnf,**kw)
-        self.memodata = memodata
+        self.accountbookdata = accountbookdata
         self.InitializeStaticWidget()
         self.PlaceStaticWidget()
         self.UpdateStaticWidgetProperty()
@@ -60,7 +60,7 @@ class AccountBookFrame(tk.Frame):
         self.label4 = label4
         self.cb4 = cb4
         self.cb4.bind('<<ComboboxSelected>>', self.UpdateStaticWidgetProperty)
-        self.cb4.set(self.memodata.GetLastRecordsByColumn('category')['data']['category'])
+        self.cb4.set(self.accountbookdata.GetLastRecordsByColumn('category')['data']['category'])
         # combobox5
         label5 = tk.Label(self, text='where')
         self.v5 = tk.StringVar()
@@ -68,7 +68,7 @@ class AccountBookFrame(tk.Frame):
         self.label5 = label5
         self.cb5 = cb5
         self.cb5.bind('<<ComboboxSelected>>', self.UpdateStaticWidgetProperty)
-        self.cb5.set(self.memodata.GetLastRecordsByColumn('where')['data']['where'])
+        self.cb5.set(self.accountbookdata.GetLastRecordsByColumn('where')['data']['where'])
         # combobox6
         label6 = tk.Label(self, text='method')
         self.v6 = tk.StringVar()
@@ -107,28 +107,28 @@ class AccountBookFrame(tk.Frame):
         # text
         self.text.configure(state='normal')
         self.text.delete('1.0','end')
-        for record in self.memodata.GetAllRecords(filter={'category':self.cb4.get(), 'where':self.cb5.get()}):
+        for record in self.accountbookdata.GetAllRecords(filter={'category':self.cb4.get(), 'where':self.cb5.get()}):
             # self.master.update()
-            self.text.insert('end', self.memodata.ConvertRecordToString(record) + "\n")
+            self.text.insert('end', self.accountbookdata.ConvertRecordToString(record) + "\n")
         self.text.see('end')
         self.text.configure(state='disabled')
         # combobox4
-        records = self.memodata.GetAllRecordsByColumn('category')
+        records = self.accountbookdata.GetAllRecordsByColumn('category')
         records = [record['data']['category'] for record in records]
         records = list(dict.fromkeys(records))
         self.cb4.configure(values=records)
         # combobox5
-        records = self.memodata.GetAllRecordsByColumn('where', filter={'category':self.cb4.get()})
+        records = self.accountbookdata.GetAllRecordsByColumn('where', filter={'category':self.cb4.get()})
         records = [record['data']['where'] for record in records]
         records = list(dict.fromkeys(records))
         self.cb5.configure(values=records)
         # combobox6
-        records = self.memodata.GetAllRecordsByColumn('method')
+        records = self.accountbookdata.GetAllRecordsByColumn('method')
         records = [record['data']['method'] for record in records]
         records = list(dict.fromkeys(records))
         self.cb6.configure(values=records)
         # combobox7
-        records = self.memodata.GetAllRecordsByColumn('amount', filter={'where':self.cb5.get()})
+        records = self.accountbookdata.GetAllRecordsByColumn('amount', filter={'where':self.cb5.get()})
         records = [record['data']['amount'] for record in records]
         records = list(dict.fromkeys(records))
         self.cb7.configure(values=records)
@@ -144,7 +144,7 @@ class AccountBookFrame(tk.Frame):
                 where = self.cb5.get()
                 method = self.cb7.get()
                 amount = self.cb8.get()
-                self.memodata.InsertRecordWithLogInfo([date, category, where, method, amount])
+                self.accountbookdata.InsertRecordWithLogInfo([date, category, where, method, amount])
                 self.UpdateStaticWidgetProperty()
                 self.cb6.set("")
                 self.cb7.set("")
@@ -157,9 +157,9 @@ if __name__ == '__main__':
     root.state("zoomed")
 
     framecompose = ComposeFrame(root)
-    memodata = MyDataBase("../data/accountbook.txt", ['date', 'category', 'where', 'method', 'amount'])
-    memoframe = AccountBookFrame(root, memodata)
-    framecompose.AddFrame(memoframe, 'memoframe', key=memoframe.OnKeyEvent)
+    accountbookdata = MyDataBase("../data/accountbook.txt", ['date', 'category', 'where', 'method', 'amount'])
+    accountbookframe = AccountBookFrame(root, accountbookdata)
+    framecompose.AddFrame(accountbookframe, 'accountbookframe', key=accountbookframe.OnKeyEvent)
 
     # メインループ
     root.mainloop()
