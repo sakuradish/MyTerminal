@@ -40,9 +40,11 @@ class MyDataBase():
 # ===================================================================================
     def InsertRecord(self, records):
         with open(self.filepath, 'a', encoding='utf-8') as f:
+            isFirstRecord = True
             for record in records:
-                if records.index(record) == 0:
+                if isFirstRecord:
                     f.write(record.replace("\n", ""))
+                    isFirstRecord = False
                 else:
                     f.write("\t" + record.replace("\n", ""))
             f.write("\n")
@@ -120,13 +122,12 @@ class MyDataBase():
                     if record['data'][sort] == item:
                         sorted.append(record)
             ret = sorted
-        # filter={'category':'趣味'}
         if filter:
             filtered = []
             for record in ret:
                 isMatched = True
                 for k,v in filter.items():
-                    if record['data'][k] != v:
+                    if not record['data'][k].find(v) != -1:
                         isMatched = False
                         break
                 if isMatched:
