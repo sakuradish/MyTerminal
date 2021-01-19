@@ -1,11 +1,16 @@
 # ===================================================================================
+from MyLogger import mylogger
+defaultlogger = mylogger('DEBUG')
+# ===================================================================================
 import os
 import datetime
 import shutil
+from memory_profiler import profile
 # ===================================================================================
 class MyDataBase():
-    def __init__(self, filepath, columns):
+    def __init__(self, filepath, columns, logger=None):
         self.filepath = filepath
+        self.logger = logger or defaultlogger
         self.logcolumns = ['date', 'weekday', 'time']
         self.datacolumns = columns
         self.callbacks = []
@@ -16,6 +21,7 @@ class MyDataBase():
                 print("Create " + self.filepath)
         self.DailyBackup()
 # ===================================================================================
+    @defaultlogger.deco
     def DailyBackup(self):
         folder = "../backup/" + str(datetime.date.today()) + "/"
         file = folder + os.path.basename(self.filepath)
@@ -24,9 +30,11 @@ class MyDataBase():
         if not os.path.exists(file):
             shutil.copy2(self.filepath, file)
 # ===================================================================================
+    @defaultlogger.deco
     def GetDataColumns(self):
         return self.datacolumns
 # ===================================================================================
+    @defaultlogger.deco
     def InsertRecordWithLogInfo(self, records):
         if len(records) != len(self.datacolumns):
             print("input records is not matching")
@@ -68,9 +76,11 @@ class MyDataBase():
         if data:
             for column in self.datacolumns:
                 texts.append(record['data'][column])
+        isFirstRecord = True
         for text in texts:
-            if texts.index(text) == 0:
+            if isFirstRecord:
                 ret += text
+                isFirstRecord = False
             else:
                 ret += "\t" + text
         return ret
@@ -99,8 +109,14 @@ class MyDataBase():
         else:
             return ""
 # ===================================================================================
+    # @profile
+    @defaultlogger.deco
     def GetAllRecords(self, sort="", filter={}):
         ret = []
+        with open(self.filepath, 'r', encoding='utf-8') as f:
+            for record in f:
+                i = 1
+
         records = open(self.filepath, 'r', encoding='utf-8').readlines()
         index = 0
         for record in records:
@@ -143,17 +159,18 @@ class MyDataBase():
             callback()
 # ===================================================================================
 if __name__ == '__main__':
-    memodata = MyDataBase("../data/memo.txt", ['project', 'task', 'memo'])
-    memodata.InsertRecordWithLogInfo(['project1', 'task1 to be deleted', 'memo'])
-    memodata.InsertRecordWithLogInfo(['project2', 'task2', 'test'])
+    data = MyDataBase("../data/explorer.txt", ['base', 'path', 'update', 'size'], mylogger)
+    data.InsertRecordWithLogInfo(['base1', 'path1 to be deleted', '2021/1/1', '0'])
+    data.InsertRecordWithLogInfo(['base2', 'path2', '2021/1/2', '0'])
     print("=================================")
-    print(memodata.GetAllRecords())
+    # print(data.GetAllRecords())
+    data.GetAllRecords()
     print("=================================")
-    memodata.DeleteRecordByIndex(0)
-    print(memodata.GetAllRecords())
-    print("=================================")
-    print(memodata.GetAllRecordsByColumn('memo'))
-    print(memodata.GetLastRecords())
-    print(memodata.GetLastRecordsByColumn('project'))
+    # data.DeleteRecordByIndex(0)
+    # print(data.GetAllRecords())
+    # print("=================================")
+    # print(data.GetAllRecordsByColumn('memo'))
+    # print(data.GetLastRecords())
+    # print(data.GetLastRecordsByColumn('project'))
     input("press any key ...")
 # ===================================================================================

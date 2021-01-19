@@ -3,6 +3,7 @@ import tkinter as tk
 from ComposeFrame import ComposeFrame
 from MyDataBase import MyDataBase
 # ===================================================================================
+from memory_profiler import profile
 import datetime
 import tkinter as tk
 from tkinter import font
@@ -57,9 +58,11 @@ class ExplorerFrame(tk.Frame):
         self.label2.place(relx=0,rely=0.95,relwidth=0.2,relheight=0.05)
         self.cb2.place(relx=0.2,rely=0.95,relwidth=0.8,relheight=0.05)
 # ===================================================================================
+    @profile
     def UpdateStaticWidgetProperty(self, event=None):
         # text
         self.text.configure(state='normal')
+        self.text.configure(undo=False)
         self.text.delete('1.0','end')
         for record in self.explorerdata.GetAllRecords(filter={'path':self.cb2.get()}):
             self.text.insert('end', self.explorerdata.ConvertRecordToString(record) + "\n")
@@ -76,33 +79,36 @@ class ExplorerFrame(tk.Frame):
         records = list(dict.fromkeys(records))
         self.cb2.configure(values=records)
 # ===================================================================================
+    @profile
     def Glob(self, path):
         if os.path.exists(path) and os.path.isdir(path):
             os.system("start " + path)
-            Checked = {}
             basedirs = [path]
+            donecnt = 0
+            remaincnt = len(basedirs)
             while 1:
-                NotChecked = [basedir for basedir in basedirs if not basedir in Checked]
-                if not NotChecked:
+                if not basedirs:
                     break
-                for basedir in NotChecked:
-                    Checked[basedir] = True
-                    try:
-                        files = [file for file in glob.glob(basedir + "/*", recursive=False) if os.path.isfile(file)]
-                        dirs = [dir for dir in glob.glob(basedir + "/*", recursive=False) if os.path.isdir(dir)]
-                        basedirs += dirs
-                        for file in files:
-                            print(file)
-                            update = datetime.datetime.fromtimestamp(os.stat(file).st_mtime)
-                            update = update.strftime('%Y/%m/%d')
-                            size = str(os.stat(file).st_size)
-                            self.explorerdata.InsertRecordWithLogInfo([self.cb1.get(), file, update, size])
-                    except:
-                        update = datetime.datetime.fromtimestamp(os.stat(basedir).st_mtime)
+                basedir = basedirs.pop(0)
+                progress = "[" + str(donecnt) + "/" + str(remaincnt) + "]"
+                try:
+                    files = [file for file in glob.glob(basedir + "/*", recursive=False) if os.path.isfile(file)]
+                    dirs = [dir for dir in glob.glob(basedir + "/*", recursive=False) if os.path.isdir(dir)]
+                    basedirs += dirs
+                    for file in files:
+                        print(progress + file)
+                        update = datetime.datetime.fromtimestamp(os.stat(file).st_mtime)
                         update = update.strftime('%Y/%m/%d')
-                        size = str(os.stat(basedir).st_size)
-                        self.explorerdata.InsertRecordWithLogInfo([self.cb1.get(), basedir, update, size])
-                        print(basedir+" can not glob for some error")
+                        size = str(os.stat(file).st_size)
+                        self.explorerdata.InsertRecordWithLogInfo([self.cb1.get(), file, update, size])
+                except:
+                    update = datetime.datetime.fromtimestamp(os.stat(basedir).st_mtime)
+                    update = update.strftime('%Y/%m/%d')
+                    size = str(os.stat(basedir).st_size)
+                    self.explorerdata.InsertRecordWithLogInfo([self.cb1.get(), basedir, update, size])
+                    print(basedir+" can not glob for some error")
+                donecnt += 1
+                remaincnt += len(basedirs)
 # ===================================================================================
     def OnKeyEvent(self, event):
         if event.keysym == 'Return':
