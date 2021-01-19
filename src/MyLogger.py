@@ -34,7 +34,9 @@ class mylogger:
                                             }
         coloredlogs.install(level=level, logger=logger,
                             fmt='[ %(asctime)s ][ %(levelname)s ][ %(funcName)s ][ %(message)s ]', datefmt='%Y/%m/%d %H:%M:%S')
-        handler = logging.FileHandler('output.log', 'w', 'utf-8')
+        if not os.path.exists("../data/"):
+            os.makedirs("../data/")
+        handler = logging.FileHandler('../data/output.log', 'w', 'utf-8')
         handler.setFormatter(logging.Formatter(
             '%(asctime)s : %(levelname)s : %(message)s', datefmt='%Y/%m/%d %H:%M:%S'))
         logger.addHandler(handler)
