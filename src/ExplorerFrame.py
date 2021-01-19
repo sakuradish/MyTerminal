@@ -2,6 +2,7 @@
 import tkinter as tk
 from ComposeFrame import ComposeFrame
 from MyDataBase import MyDataBase
+from MyLogger import mylogger
 # ===================================================================================
 from memory_profiler import profile
 import datetime
@@ -14,6 +15,7 @@ import glob
 import os
 # ===================================================================================
 class ExplorerFrame(tk.Frame):
+    @mylogger.deco
     def __init__(self,master, explorerdata, cnf={},**kw):
         super().__init__(master,cnf,**kw)
         self.explorerdata = explorerdata
@@ -21,6 +23,7 @@ class ExplorerFrame(tk.Frame):
         self.PlaceStaticWidget()
         self.UpdateStaticWidgetProperty()
 # ===================================================================================
+    @mylogger.deco
     def InitializeStaticWidget(self):
         # text
         my_font = font.Font(self.master ,family=u'ＭＳ ゴシック',size=8)
@@ -49,6 +52,7 @@ class ExplorerFrame(tk.Frame):
         self.label2 = label2
         self.cb2 = cb2
 # ===================================================================================
+    @mylogger.deco
     def PlaceStaticWidget(self):
         self.label1.place(relx=0,rely=0,relwidth=0.2,relheight=0.05)
         self.cb1.place(relx=0.2,rely=0,relwidth=0.8,relheight=0.05)
@@ -58,7 +62,7 @@ class ExplorerFrame(tk.Frame):
         self.label2.place(relx=0,rely=0.95,relwidth=0.2,relheight=0.05)
         self.cb2.place(relx=0.2,rely=0.95,relwidth=0.8,relheight=0.05)
 # ===================================================================================
-    @profile
+    @mylogger.deco
     def UpdateStaticWidgetProperty(self, event=None):
         # text
         self.text.configure(state='normal')
@@ -79,7 +83,7 @@ class ExplorerFrame(tk.Frame):
         records = list(dict.fromkeys(records))
         self.cb2.configure(values=records)
 # ===================================================================================
-    @profile
+    @mylogger.deco
     def Glob(self, path):
         if os.path.exists(path) and os.path.isdir(path):
             os.system("start " + path)
@@ -110,6 +114,7 @@ class ExplorerFrame(tk.Frame):
                 donecnt += 1
                 remaincnt += len(basedirs)
 # ===================================================================================
+    @mylogger.deco
     def OnKeyEvent(self, event):
         if event.keysym == 'Return':
             if self.cb1 == self.master.focus_get() and self.cb1.get() != "":

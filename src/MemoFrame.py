@@ -2,6 +2,7 @@
 import tkinter as tk
 from ComposeFrame import ComposeFrame
 from MyDataBase import MyDataBase
+from MyLogger import mylogger
 # ===================================================================================
 import datetime
 import tkinter as tk
@@ -11,6 +12,7 @@ from PIL import Image, ImageTk
 import time
 # ===================================================================================
 class MemoFrame(tk.Frame):
+    @mylogger.deco
     def __init__(self,master, memodata, tododata, cnf={},**kw):
         super().__init__(master,cnf,**kw)
         self.memodata = memodata
@@ -18,6 +20,7 @@ class MemoFrame(tk.Frame):
         self.tododata = tododata
         self.tododata.AddOnUpdateCallback(self.UpdateText)
         self.draw()
+    @mylogger.deco
     def draw(self):
         # text
         my_font = font.Font(self.master ,family=u'ＭＳ ゴシック',size=14)
@@ -65,6 +68,7 @@ class MemoFrame(tk.Frame):
 
         self.UpdateText()
 # ===================================================================================
+    @mylogger.deco
     def OnKeyEvent(self, event):
         if event.keysym == 'Return':
             if self.cb1 == self.master.focus_get() or \
@@ -72,6 +76,7 @@ class MemoFrame(tk.Frame):
                self.cb3 == self.master.focus_get():
                 self.UpdateText()
 # ===================================================================================
+    @mylogger.deco
     def UpdateText(self):
         self.text.configure(state='normal')
         self.text.delete('1.0','end')

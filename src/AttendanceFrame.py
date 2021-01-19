@@ -2,6 +2,7 @@
 import tkinter as tk
 from ComposeFrame import ComposeFrame
 from MyDataBase import MyDataBase
+from MyLogger import mylogger
 # ===================================================================================
 import datetime
 import tkinter as tk
@@ -11,12 +12,14 @@ from PIL import Image, ImageTk
 import time
 # ===================================================================================
 class AttendanceFrame(tk.Frame):
+    @mylogger.deco
     def __init__(self,master, attendancedata,cnf={},**kw):
         super().__init__(master,cnf,**kw)
         self.attendancedata = attendancedata
         self.attendancedata.AddOnUpdateCallback(self.UpdateData)
         self.InitializeStaticWidget()
         self.UpdateData()
+    @mylogger.deco
     def InitializeStaticWidget(self):
         # text
         my_font = font.Font(self.master ,family=u'ＭＳ ゴシック',size=14)
@@ -68,6 +71,7 @@ class AttendanceFrame(tk.Frame):
         self.label6 = label6
         self.cb6 = cb6
         self.PlaceStaticWidget()
+    @mylogger.deco
     def PlaceStaticWidget(self):
         # text
         self.text.place(relx=0,rely=0,relwidth=0.97,relheight=0.47)
@@ -92,6 +96,7 @@ class AttendanceFrame(tk.Frame):
         self.label6.place(relx=0,rely=0.8,relwidth=0.2,relheight=0.05)
         self.cb6.place(relx=0.2,rely=0.8,relwidth=0.8,relheight=0.05)
 # ===================================================================================
+    @mylogger.deco
     def OnKeyEvent(self, event):
         if event.keysym == 'Return':
             if (self.cb5 == self.master.focus_get() or self.cb6 == self.master.focus_get()) and \
@@ -99,6 +104,7 @@ class AttendanceFrame(tk.Frame):
                 self.attendancedata.InsertRecordWithLogInfo([self.cb1.get(),self.cb2.get(),self.cb3.get(),self.cb4.get(),self.cb5.get(),self.cb6.get()])
                 self.UpdateData()
 # ===================================================================================
+    @mylogger.deco
     def UpdateData(self):
         if self.attendancedata.GetAllRecords():
             self.text.configure(state='normal')

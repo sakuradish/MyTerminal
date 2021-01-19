@@ -1,6 +1,5 @@
 # ===================================================================================
 from MyLogger import mylogger
-defaultlogger = mylogger('DEBUG')
 # ===================================================================================
 import os
 import datetime
@@ -8,9 +7,9 @@ import shutil
 from memory_profiler import profile
 # ===================================================================================
 class MyDataBase():
-    def __init__(self, filepath, columns, logger=None):
+    @mylogger.deco
+    def __init__(self, filepath, columns):
         self.filepath = filepath
-        self.logger = logger or defaultlogger
         self.logcolumns = ['date', 'weekday', 'time']
         self.datacolumns = columns
         self.callbacks = []
@@ -21,7 +20,7 @@ class MyDataBase():
                 print("Create " + self.filepath)
         self.DailyBackup()
 # ===================================================================================
-    @defaultlogger.deco
+    @mylogger.deco
     def DailyBackup(self):
         folder = "../backup/" + str(datetime.date.today()) + "/"
         file = folder + os.path.basename(self.filepath)
@@ -30,11 +29,11 @@ class MyDataBase():
         if not os.path.exists(file):
             shutil.copy2(self.filepath, file)
 # ===================================================================================
-    @defaultlogger.deco
+    @mylogger.deco
     def GetDataColumns(self):
         return self.datacolumns
 # ===================================================================================
-    @defaultlogger.deco
+    @mylogger.deco
     def InsertRecordWithLogInfo(self, records):
         if len(records) != len(self.datacolumns):
             print("input records is not matching")
@@ -46,6 +45,7 @@ class MyDataBase():
         temprecords += records
         self.InsertRecord(temprecords)
 # ===================================================================================
+    @mylogger.deco
     def InsertRecord(self, records):
         with open(self.filepath, 'a', encoding='utf-8') as f:
             isFirstRecord = True
@@ -58,6 +58,7 @@ class MyDataBase():
             f.write("\n")
         self.OnUpdate()
 # ===================================================================================
+    @mylogger.deco
     def DeleteRecordByIndex(self, index):
         records = self.GetAllRecords()
         del records[index]
@@ -66,6 +67,7 @@ class MyDataBase():
                 f.write(self.ConvertRecordToString(record) + "\n")
         self.OnUpdate()
 # ===================================================================================
+    # @mylogger.deco
     def ConvertRecordToString(self, record, log=True, data=True):
         ret = ""
         texts = []
@@ -85,6 +87,7 @@ class MyDataBase():
                 ret += "\t" + text
         return ret
 # ===================================================================================
+    @mylogger.deco
     def GetLastRecordsByColumn(self, column, sort="", filter={}):
         records = self.GetAllRecordsByColumn(column, sort=sort, filter=filter)
         if records:
@@ -92,6 +95,7 @@ class MyDataBase():
         else:
             return ""
 # ===================================================================================
+    @mylogger.deco
     def GetAllRecordsByColumn(self, column, sort="", filter={}):
         ret = []
         records = self.GetAllRecords(sort=sort, filter=filter)
@@ -102,6 +106,7 @@ class MyDataBase():
             ret.append({'index':index, 'data':data})
         return ret
 # ===================================================================================
+    @mylogger.deco
     def GetLastRecords(self, sort="", filter={}):
         records = self.GetAllRecords(sort=sort, filter=filter)
         if records:
@@ -110,13 +115,9 @@ class MyDataBase():
             return ""
 # ===================================================================================
     # @profile
-    @defaultlogger.deco
+    @mylogger.deco
     def GetAllRecords(self, sort="", filter={}):
         ret = []
-        with open(self.filepath, 'r', encoding='utf-8') as f:
-            for record in f:
-                i = 1
-
         records = open(self.filepath, 'r', encoding='utf-8').readlines()
         index = 0
         for record in records:
@@ -151,26 +152,27 @@ class MyDataBase():
             ret = filtered
         return ret
 # ===================================================================================
+    @mylogger.deco
     def AddOnUpdateCallback(self, callback):
         self.callbacks.append(callback)
 # ===================================================================================
+    @mylogger.deco
     def OnUpdate(self):
         for callback in self.callbacks:
             callback()
 # ===================================================================================
 if __name__ == '__main__':
-    data = MyDataBase("../data/explorer.txt", ['base', 'path', 'update', 'size'], mylogger)
+    data = MyDataBase("../data/explorer.txt", ['base', 'path', 'update', 'size'])
     data.InsertRecordWithLogInfo(['base1', 'path1 to be deleted', '2021/1/1', '0'])
     data.InsertRecordWithLogInfo(['base2', 'path2', '2021/1/2', '0'])
     print("=================================")
-    # print(data.GetAllRecords())
-    data.GetAllRecords()
+    print(data.GetAllRecords())
     print("=================================")
-    # data.DeleteRecordByIndex(0)
-    # print(data.GetAllRecords())
-    # print("=================================")
-    # print(data.GetAllRecordsByColumn('memo'))
-    # print(data.GetLastRecords())
-    # print(data.GetLastRecordsByColumn('project'))
+    data.DeleteRecordByIndex(0)
+    print(data.GetAllRecords())
+    print("=================================")
+    print(data.GetAllRecordsByColumn('memo'))
+    print(data.GetLastRecords())
+    print(data.GetLastRecordsByColumn('project'))
     input("press any key ...")
 # ===================================================================================

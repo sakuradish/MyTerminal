@@ -1,13 +1,17 @@
 # ===================================================================================
+from MyLogger import mylogger
+# ===================================================================================
 import tkinter as tk
 import datetime
 # from tkinter import font
 from tkinter import ttk
+from memory_profiler import profile
 # from PIL import Image, ImageTk
 # import time
 import math
 # ===================================================================================
 class ComposeFrame(tk.Frame):
+    @mylogger.deco
     def __init__(self, master=None,cnf={},**kw):
         super().__init__(master,cnf,**kw)
         self.frames = []
@@ -17,6 +21,7 @@ class ComposeFrame(tk.Frame):
         self.master.bind("<Button>", self.OnMouseEvent)
         self.OnTick()
 # ===================================================================================
+    @mylogger.deco
     def AddFrame(self, frame, id, key=None, mouse=None, time=None):
         button = tk.Button(self.master, text=id)
         # button.state(['pressed'])
@@ -28,6 +33,7 @@ class ComposeFrame(tk.Frame):
             self.frames.append([frame, id, False, button, key, mouse, time])
         self.initialize()
 # ===================================================================================
+    @mylogger.deco
     def Draw(self):
         # toggleボタンを表示更新
         num = 0
@@ -66,6 +72,7 @@ class ComposeFrame(tk.Frame):
                     # print(visibleFrames[index].place_info())
                     visibleFrames[index].place(relx=relx,rely=rely,relwidth=relwidth,relheight=relheight)
 # ===================================================================================
+    @mylogger.deco
     def toggleView(self, event):
         target = event.widget["text"]
         for frame in self.frames:
@@ -76,12 +83,14 @@ class ComposeFrame(tk.Frame):
                     frame[2] = True
         self.initialize()
 # ===================================================================================
+    @mylogger.deco
     def initialize(self):
         for frame in self.frames:
             frame[0].place_forget()
             frame[3].place_forget()
         self.Draw()
 # ===================================================================================
+    @mylogger.deco
     def OnKeyEvent(self, event):
         if self.isKeyEventProcessing == False:
             self.isKeyEventProcessing = True
@@ -91,6 +100,7 @@ class ComposeFrame(tk.Frame):
                     frame[4](event)
             self.isKeyEventProcessing = False
 # ===================================================================================
+    @mylogger.deco
     def OnMouseEvent(self, event):
         if self.isMouseEventProcessing == False:
             self.isMouseEventProcessing = True
@@ -100,12 +110,14 @@ class ComposeFrame(tk.Frame):
                     frame[5](event)
             self.isMouseEventProcessing = False
 # ===================================================================================
+    # @mylogger.deco
+    @profile
     def OnTick(self):
         for frame in self.frames:
             if frame[6]:
                 frame[6]()
         # print(datetime.datetime(2021, 5, 5, 10,10,10) - datetime.datetime.now())
-        self.master.after(1000,self.OnTick)
+        self.master.after(10000,self.OnTick)
 # ===================================================================================
 if __name__ == '__main__':
     # ウィンドウ作成

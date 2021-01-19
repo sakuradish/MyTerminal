@@ -2,6 +2,7 @@
 import tkinter as tk
 from ComposeFrame import ComposeFrame
 from MyDataBase import MyDataBase
+from MyLogger import mylogger
 # ===================================================================================
 import datetime
 import tkinter as tk
@@ -13,6 +14,7 @@ import glob
 import os
 # ===================================================================================
 class ExplorerFrame(tk.Frame):
+    @mylogger.deco
     def __init__(self,master, explorerdata, cnf={},**kw):
         super().__init__(master,cnf,**kw)
         self.explorerdata = explorerdata
@@ -20,6 +22,7 @@ class ExplorerFrame(tk.Frame):
         self.PlaceStaticWidget()
         self.UpdateStaticWidgetProperty()
 # ===================================================================================
+    @mylogger.deco
     def InitializeStaticWidget(self):
         # combobox1
         label1 = tk.Label(self, text='output')
@@ -42,6 +45,7 @@ class ExplorerFrame(tk.Frame):
         self.y_sb = y_sb
         self.text = text
 # ===================================================================================
+    @mylogger.deco
     def PlaceStaticWidget(self):
         self.label1.place(relx=0,rely=0,relwidth=0.2,relheight=0.05)
         self.cb1.place(relx=0.2,rely=0,relwidth=0.8,relheight=0.05)
@@ -49,6 +53,7 @@ class ExplorerFrame(tk.Frame):
         self.x_sb.place(relx=0,rely=0.9,relwidth=0.95,relheight=0.05)
         self.y_sb.place(relx=0.95,rely=0.05,relwidth=0.05,relheight=0.85)
 # ===================================================================================
+    @mylogger.deco
     def UpdateStaticWidgetProperty(self, event=None):
         print("nothing to update")
         # # text
@@ -69,6 +74,7 @@ class ExplorerFrame(tk.Frame):
         # records = list(dict.fromkeys(records))
         # self.cb2.configure(values=records)
 # ===================================================================================
+    @mylogger.deco
     def OnKeyEvent(self, event):
         if event.keysym == 'Return':
             if self.cb1 == self.master.focus_get() and self.cb1.get() != "":

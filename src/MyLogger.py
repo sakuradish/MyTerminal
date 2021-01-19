@@ -4,6 +4,9 @@ import coloredlogs
 import time
 import math
 import sys
+import os
+import inspect
+from memory_profiler import profile
 # ===================================================================================
 logger = logging.getLogger(__file__)
 origin_critical = logger.critical
@@ -45,17 +48,25 @@ class mylogger:
         self.stack = {}
         self.stacklevel = 0
 # ===================================================================================
-    def deco(self, func):
-        callstack = sys._getframe().f_back.f_code.co_name
-        print(callstack)
+    @classmethod
+    def GetInstance(cls, level='INFO'):
+        if not hasattr(cls, "this_"):
+            cls.this_ = cls(level=level)
+        return cls.this_
+# ===================================================================================
+    @classmethod
+    def deco(cls, func):
+        callstack = inspect.stack()[1].code_context[0]
+        callstack = callstack[callstack.find("def ")+4:]
+        callstack = callstack[:callstack.find("("):]
         def decowrapper(*args,**kwargs):
-            self.start(callstack)
+            cls.GetInstance().begin(callstack)
             ret = func(*args,**kwargs)
-            self.complete()
+            cls.GetInstance().finish()
             return ret
         return decowrapper
 # ===================================================================================
-    def start(self, callstack):
+    def begin(self, callstack):
         func = callstack
         start = time.time()
         self.stacklevel += 1
@@ -67,14 +78,18 @@ class mylogger:
             start = self.stack[i]['start']
             elapsedTime = math.floor(time.time() - start)
             self.stack[i]['elapsedTime'] = elapsedTime
-            self.info(self.stack[i])
+        stack = self.stack[self.stacklevel].copy()
+        del stack['start']
+        self.info(stack)
 # ===================================================================================
-    def complete(self):
+    def finish(self):
         for i in range(1,self.stacklevel+1,1):
             start = self.stack[i]['start']
             elapsedTime = math.floor(time.time() - start)
             self.stack[i]['elapsedTime'] = elapsedTime
-            self.info(self.stack[i])
+        stack = self.stack[self.stacklevel].copy()
+        del stack['start']
+        self.info(stack)
         self.stacklevel -= 1
 # ===================================================================================
     def critical(self, *args, **kwargs):
@@ -110,20 +125,29 @@ class mylogger:
     def _log(self, level, msg, args, exc_info=None, extra=None, stack_info=False, stacklevel=3):
         origin_log(level, msg, args, exc_info, extra, stack_info, stacklevel)
 # ===================================================================================
-# ===================================================================================
 if __name__ == "__main__":
     mylogger = mylogger('DEBUG')
     @mylogger.deco
-    def test():
-        logger.critical("This is CRITICAL.")
+    def critical():
         mylogger.critical("This is CRITICAL.")
-        logger.error("This is ERROR.")
+    @mylogger.deco
+    def error():
         mylogger.error("This is ERROR.")
-        logger.warning("This is WARNING.")
+    @mylogger.deco
+    def warning():
         mylogger.warning("This is WARNING.")
-        logger.info("This is INFO.")
+    @mylogger.deco
+    def info():
         mylogger.info("This is INFO.")
-        logger.debug("This is DEBUG.")
+    @mylogger.deco
+    def debug():
         mylogger.debug("This is DEBUG.")
+    @mylogger.deco
+    def test():
+        critical()
+        error()
+        warning()
+        info()
+        debug()
     test()
 #============================================================================================================================================================================================================================================================

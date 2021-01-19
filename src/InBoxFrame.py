@@ -1,7 +1,7 @@
-
 # ===================================================================================
 from ComposeFrame import ComposeFrame
 from MyDataBase import MyDataBase
+from MyLogger import mylogger
 # ===================================================================================
 import datetime
 import tkinter as tk
@@ -13,6 +13,7 @@ import time
 import math
 # ===================================================================================
 class InBoxFrame(tk.Frame):
+    @mylogger.deco
     def __init__(self, master, memodata, tododata, tasklog ,cnf={},**kw):
         super().__init__(master,cnf,**kw)
         self.memodata = memodata
@@ -23,6 +24,7 @@ class InBoxFrame(tk.Frame):
         self.InitializeStaticWidget()
         self.InitializeDynamicWidget()
 # ===================================================================================
+    @mylogger.deco
     def InitializeStaticWidget(self):
         # combobox1
         label1 = tk.Label(self, text='project')
@@ -105,6 +107,7 @@ class InBoxFrame(tk.Frame):
         self.UpdateStaticWidgetProperty()
         self.PlaceStaticWidget()
 # ===================================================================================
+    @mylogger.deco
     def PlaceStaticWidget(self):
         # combobox1
         self.label1.place(relx=0,rely=0,relwidth=0.2,relheight=0.05)
@@ -143,6 +146,7 @@ class InBoxFrame(tk.Frame):
         # next page button
         self.next.place(relx=0.9,rely=0.35,relwidth=0.1,relheight=0.05)
 # ===================================================================================
+    @mylogger.deco
     def UpdateStaticWidgetProperty(self):
         if self.tododata.GetAllRecords():
             # combobox1
@@ -196,6 +200,7 @@ class InBoxFrame(tk.Frame):
             records = list(dict.fromkeys(records))
             self.cb9.configure(values=records)
 # ===================================================================================
+    @mylogger.deco
     def InitializeDynamicWidget(self):
         for todo in self.todolist:
             for widget in todo['widgets'].values():
@@ -241,6 +246,7 @@ class InBoxFrame(tk.Frame):
         self.UpdateDynamicWidgetProperty()
         self.PlaceDynamicWidget()
 # ===================================================================================
+    @mylogger.deco
     def PlaceDynamicWidget(self):
         # stateがOPENのものだけ表示
         records = []
@@ -275,6 +281,7 @@ class InBoxFrame(tk.Frame):
             records[num]['widgets']['separator'].place(rely=count*0.03+0.4, relx=0, relwidth=1)
             count += 1
 # ===================================================================================
+    @mylogger.deco
     def UpdateDynamicWidgetProperty(self):
         for todo in self.todolist:
             projecttext = tk.StringVar()
@@ -297,6 +304,7 @@ class InBoxFrame(tk.Frame):
             statetext.set(todo['record']['data']['state'])
             todo['widgets']['state'].configure(textvariable=statetext)
 # ===================================================================================
+    @mylogger.deco
     def PagePrev(self, event):
         total = int(self.totalpage.cget('text'))
         current = int(self.currentpage.get())
@@ -307,6 +315,7 @@ class InBoxFrame(tk.Frame):
             self.InitializeDynamicWidget()
             self.UpdateStaticWidgetProperty()
 # ===================================================================================
+    @mylogger.deco
     def PageNext(self, event):
         total = int(self.totalpage.cget('text'))
         current = int(self.currentpage.get())
@@ -317,6 +326,7 @@ class InBoxFrame(tk.Frame):
             self.InitializeDynamicWidget()
             self.UpdateStaticWidgetProperty()
 # ===================================================================================
+    @mylogger.deco
     def OnOpenBtn(self, event):
         for todo in self.todolist:
             if todo['widgets']['openbtn'] == event.widget:
@@ -335,6 +345,7 @@ class InBoxFrame(tk.Frame):
         self.UpdateStaticWidgetProperty()
         self.InitializeDynamicWidget()
 # ===================================================================================
+    @mylogger.deco
     def OnDoingBtn(self, event):
         for todo in self.todolist:
             if todo['widgets']['doingbtn'] == event.widget:
@@ -353,6 +364,7 @@ class InBoxFrame(tk.Frame):
         self.UpdateStaticWidgetProperty()
         self.InitializeDynamicWidget()
 # ===================================================================================
+    @mylogger.deco
     def OnDoneBtn(self, event):
         for todo in self.todolist:
             if todo['widgets']['donebtn'] == event.widget:
@@ -371,9 +383,11 @@ class InBoxFrame(tk.Frame):
         self.UpdateStaticWidgetProperty()
         self.InitializeDynamicWidget()
 # ===================================================================================
+    @mylogger.deco
     def OnTick(self):
         self.UpdateDynamicWidgetProperty()
 # ===================================================================================
+    @mylogger.deco
     def OnKeyEvent(self, event):
         if event.keysym == 'Return':
             if self.cb2 == self.master.focus_get() and self.cb2.get() != "":

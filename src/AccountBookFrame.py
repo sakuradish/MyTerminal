@@ -2,6 +2,7 @@
 import tkinter as tk
 from ComposeFrame import ComposeFrame
 from MyDataBase import MyDataBase
+from MyLogger import mylogger
 # ===================================================================================
 import datetime
 import tkinter as tk
@@ -11,6 +12,7 @@ from PIL import Image, ImageTk
 import time
 # ===================================================================================
 class AccountBookFrame(tk.Frame):
+    @mylogger.deco
     def __init__(self,master, accountbookdata, cnf={},**kw):
         super().__init__(master,cnf,**kw)
         self.accountbookdata = accountbookdata
@@ -18,6 +20,7 @@ class AccountBookFrame(tk.Frame):
         self.PlaceStaticWidget()
         self.UpdateStaticWidgetProperty()
 # ===================================================================================
+    @mylogger.deco
     def InitializeStaticWidget(self):
         # text
         my_font = font.Font(self.master ,family=u'ＭＳ ゴシック',size=14)
@@ -84,6 +87,7 @@ class AccountBookFrame(tk.Frame):
         self.cb7 = cb7
         self.cb7.bind('<<ComboboxSelected>>', self.UpdateStaticWidgetProperty)
 # ===================================================================================
+    @mylogger.deco
     def PlaceStaticWidget(self):
         self.text.place(relx=0,rely=0,relwidth=0.95,relheight=0.55)
         self.x_sb.place(relx=0,rely=0.55,relwidth=0.95,relheight=0.05)
@@ -103,6 +107,7 @@ class AccountBookFrame(tk.Frame):
         self.label7.place(relx=0,rely=0.9,relwidth=0.2,relheight=0.05)
         self.cb7.place(relx=0.2,rely=0.9,relwidth=0.8,relheight=0.05)
 # ===================================================================================
+    @mylogger.deco
     def UpdateStaticWidgetProperty(self, event=None):
         # text
         self.text.configure(state='normal')
@@ -133,6 +138,7 @@ class AccountBookFrame(tk.Frame):
         records = list(dict.fromkeys(records))
         self.cb7.configure(values=records)
 # ===================================================================================
+    @mylogger.deco
     def OnKeyEvent(self, event):
         if event.keysym == 'Return':
             if self.cb7 == self.master.focus_get() and self.cb7.get() != "":
