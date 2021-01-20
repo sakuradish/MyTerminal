@@ -71,7 +71,7 @@ class AccountBookFrame(tk.Frame):
         self.label5 = label5
         self.cb5 = cb5
         self.cb5.bind('<<ComboboxSelected>>', self.UpdateStaticWidgetProperty)
-        self.cb5.set(self.accountbookdata.GetLastRecordsByColumn('where')['data']['where'])
+        # self.cb5.set(self.accountbookdata.GetLastRecordsByColumn('where')['data']['where'])
         # combobox6
         label6 = tk.Label(self, text='method')
         self.v6 = tk.StringVar()

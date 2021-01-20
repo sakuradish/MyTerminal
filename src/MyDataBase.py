@@ -104,6 +104,7 @@ class MyDataBase():
             data = {}
             data[column] = record['data'][column]
             ret.append({'index':index, 'data':data})
+        print(ret)
         return ret
 # ===================================================================================
     @mylogger.deco
