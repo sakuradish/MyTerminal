@@ -77,6 +77,14 @@ class TemplateFrame(tk.Frame):
                 records = list(dict.fromkeys(records))
                 self.widgets[column][1].configure(values=records)
                 self.widgets[column][1].set(self.mydata.GetLastRecordsByColumn(column)['data'][column])
+            records = self.mydata.GetAllRecords()
+            recordidx = 0
+            for record in records:
+                if len(self.editor) <= recordidx:
+                    break
+                for column in mydata.GetDataColumns():
+                    self.editor[recordidx][column][0].set(record['data'][column])
+                recordidx += 1
 # ===================================================================================
     @mylogger.deco
     def InitializeDynamicWidget(self):
@@ -106,6 +114,7 @@ class TemplateFrame(tk.Frame):
             for column in mydata.GetDataColumns():
                 record.append(self.widgets[column][1].get())
             self.mydata.InsertRecordWithLogInfo(record)
+            self.UpdateStaticWidgetProperty()
 # ===================================================================================
 if __name__ == '__main__':
     # ウィンドウ作成
