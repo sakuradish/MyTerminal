@@ -105,15 +105,33 @@ class TemplateFrame(tk.Frame):
     @mylogger.deco
     def OnKeyEvent(self, event):
         if event.keysym == 'Return':
-            isCbFocused = False
+            print("enter key pressed")
+            isWidgetFocused = False
             for column in mydata.GetDataColumns():
                 if self.widgets[column][1] == self.master.focus_get() and self.widgets[column][1] != "":
-                    isCbFocused = True
+                    isWidgetFocused = True
                     break
-            record = []
-            for column in mydata.GetDataColumns():
-                record.append(self.widgets[column][1].get())
-            self.mydata.InsertRecordWithLogInfo(record)
+            if isWidgetFocused:
+                record = []
+                for column in mydata.GetDataColumns():
+                    record.append(self.widgets[column][1].get())
+                self.mydata.InsertRecordWithLogInfo(record)
+            # 仮実装
+            isEditorFocused = False
+            print("check editor focus")
+            for i in range(0, self.tempcnt, 1):
+                for column in mydata.GetDataColumns():
+                    if self.editor[i][column][0] == self.master.focus_get() and self.editor[i][column][0] != "":
+                        print(self.editor[i][column][0])
+                        print("is focused")
+                        isEditorFocused = True
+                        break
+            # 編集機能は間に合わなかった
+            # if isWidgetFocused:
+            #     record = []
+            #     for column in mydata.GetDataColumns():
+            #         record.append(self.widgets[column][1].get())
+            #     self.mydata.InsertRecordWithLogInfo(record)
             self.UpdateStaticWidgetProperty()
 # ===================================================================================
 if __name__ == '__main__':
