@@ -18,6 +18,8 @@ class TemplateFrame(tk.Frame):
         super().__init__(master,cnf,**kw)
         self.mydata = mydata
         self.widgets = {}
+        self.editor = {}
+        self.tempcnt = 0
         self.InitializeStaticWidget()
 # ===================================================================================
     def Combobox(self, text):
@@ -25,11 +27,25 @@ class TemplateFrame(tk.Frame):
         v = tk.StringVar()
         cb = ttk.Combobox(self, textvariable=v)
         return [label, cb, v]
+    def ComboboxNonLabel(self):
+        v = tk.StringVar()
+        cb = ttk.Combobox(self, textvariable=v)
+        return [cb, v]
 # ===================================================================================
     @mylogger.deco
     def InitializeStaticWidget(self):
         for column in mydata.GetDataColumns():
             self.widgets[column] = self.Combobox(column)
+        # 仮実装
+        self.tempcnt = int((1 - 0.05*len(self.widgets)) / 0.05)
+        print(self.tempcnt)
+        self.editor = {}
+        for i in range(0, self.tempcnt, 1):
+            print(i)
+            self.editor[i] = {}
+            for column in mydata.GetDataColumns():
+                self.editor[i][column] = self.ComboboxNonLabel()
+        print(self.editor)
         self.UpdateStaticWidgetProperty()
         self.PlaceStaticWidget()
 # ===================================================================================
@@ -40,6 +56,17 @@ class TemplateFrame(tk.Frame):
             self.widgets[column][0].place(relx=0,rely=0+0.05*count,relwidth=0.2,relheight=0.05)
             self.widgets[column][1].place(relx=0.2,rely=0+0.05*count,relwidth=0.8,relheight=0.05)
             count += 1
+        # 仮実装
+        print("koko yobareteru???????????????")
+        offsety = count*0.05
+        for i in range(0, self.tempcnt, 1):
+            for column in mydata.GetDataColumns():
+                print(i,column)
+                relwidth = 1 / len(self.widgets)
+                relheight = 0.05
+                relx = 0 + relwidth*mydata.GetDataColumns().index(column)
+                rely = offsety + 0.05*i
+                self.editor[i][column][0].place(relx=relx,rely=rely,relwidth=relwidth,relheight=relheight)
 # ===================================================================================
     @mylogger.deco
     def UpdateStaticWidgetProperty(self):
