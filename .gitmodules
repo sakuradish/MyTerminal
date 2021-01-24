@@ -1,0 +1,3 @@
+[submodule "src/MyLogger"]
+	path = src/MyLogger
+	url = git@github.com:sakuradish/MyLogger.git
