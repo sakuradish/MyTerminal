@@ -1,11 +1,10 @@
 # ===================================================================================
-from MyLogger import mylogger
+from MyLogger.MyLogger import mylogger
 # ===================================================================================
 import tkinter as tk
 import datetime
 # from tkinter import font
 from tkinter import ttk
-from memory_profiler import profile
 # from PIL import Image, ImageTk
 # import time
 import math
@@ -17,7 +16,7 @@ class ComposeFrame(tk.Frame):
         self.frames = []
         self.isKeyEventProcessing = False
         self.isMouseEventProcessing = False
-        self.master.bind("<Key>", self.OnKeyEvent)
+        self.master.bind("<Control-Key>", self.OnKeyEvent)
         self.master.bind("<Button>", self.OnMouseEvent)
         self.OnTick()
 # ===================================================================================
@@ -92,6 +91,16 @@ class ComposeFrame(tk.Frame):
 # ===================================================================================
     @mylogger.deco
     def OnKeyEvent(self, event):
+        try:
+            index = int(event.keysym) - 1
+            if self.frames[index][2]:
+                self.frames[index][2] = False
+            else:
+                self.frames[index][2] = True
+            self.initialize()
+        except:
+            pass
+
         if self.isKeyEventProcessing == False:
             self.isKeyEventProcessing = True
             print(event)
@@ -110,8 +119,7 @@ class ComposeFrame(tk.Frame):
                     frame[5](event)
             self.isMouseEventProcessing = False
 # ===================================================================================
-    # @mylogger.deco
-    @profile
+    @mylogger.deco
     def OnTick(self):
         for frame in self.frames:
             if frame[6]:
