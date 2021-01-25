@@ -14,6 +14,10 @@ class MyRecordManager():
         self.datacolumns = datacolumns
 # ===================================================================================
     @mylogger.deco
+    def GetDataColumns(self):
+        return self.datacolumns
+# ===================================================================================
+    @mylogger.deco
     def GetEmptyRecord(self):
         record = {}
         record['index'] = -1
@@ -166,6 +170,29 @@ class MyDataBase():
         self.OnUpdate()
 # ===================================================================================
     @mylogger.deco
+    def WriteRecords(self, records):
+        lines = self.rm.ConvertRecordsToLines(records)
+        with open(self.filepath, 'w', encoding='utf-8') as f:
+            for line in lines:
+                f.write(line)
+        self.OnUpdate()
+# ===================================================================================
+    @mylogger.deco
+    def ReplaceRecords(self, records):
+        # replace
+        origin_records = self.GetRecords()
+        columns = self.GetDataColumns()
+        for record in records:
+            for column in columns:
+                origin_records[record["index"]]["data"][column] = record["data"][column]
+        # write
+        lines = self.rm.ConvertRecordsToLines(origin_records)
+        with open(self.filepath, 'w', encoding='utf-8') as f:
+            for line in lines:
+                f.write(line)
+        self.OnUpdate()
+# ===================================================================================
+    @mylogger.deco
     def PushbackRecords(self, records):
         lines = self.rm.ConvertRecordsToLines(records)
         with open(self.filepath, 'a', encoding='utf-8') as f:
@@ -184,7 +211,7 @@ class MyDataBase():
 # ===================================================================================
     @mylogger.deco
     def GetDataColumns(self):
-        return self.datacolumns
+        return self.rm.GetDataColumns()
 # ===================================================================================
     @mylogger.deco
     def AddOnUpdateCallback(self, callback):
