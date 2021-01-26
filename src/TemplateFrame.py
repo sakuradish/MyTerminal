@@ -43,7 +43,7 @@ class TemplateFrame(tk.Frame):
             records = [record['data'][column] for record in records]
             records = list(dict.fromkeys(records))
             self.inputfield['combobox']['widgets'][column]['combobox'].configure(values=records)
-            self.inputfield['combobox']['widgets'][column]['combobox'].set(self.mydata.GetRecords(row=-1)['data'][column])
+            self.inputfield['combobox']['widgets'][column]['combobox'].set(self.mydata.GetRecords(row=-1)[0]['data'][column])
             self.filterfield['widgets'][column]['combobox'].configure(values=records)
             # self.filterfield[column]['combobox'].set(self.mydata.GetRecords(row=-1)['data'][column])
 # ===================================================================================

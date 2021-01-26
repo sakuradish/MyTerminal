@@ -33,70 +33,71 @@ class MyRecordManager():
 # ===================================================================================
     @mylogger.deco
     def ExtractRecordsByColumn(self, arg_records, column):
-        if column:
-            mylogger.info("メモリ削減に必要かも？")
-            return arg_records
-        else:
-            return arg_records
+        if arg_records:
+            if column:
+                mylogger.info("メモリ削減に必要かも？")
+                return arg_records
+        return arg_records
 # ===================================================================================
     @mylogger.deco
     def ExtractRecordsByRow(self, arg_records, row):
-        if row:
-            return arg_records[row]
-        else:
-            return arg_records
+        if arg_records:
+            if row:
+                return [arg_records[row]]
+        return arg_records
 # ===================================================================================
     @mylogger.deco
     def FilterRecords(self, arg_records, filter):
         ret_records = []
-        if filter:
-            for arg_record in arg_records:
-                isMatched = True
-                for k,v in filter.items():
-                    if not v.lower() in arg_record['data'][k].lower():
-                        isMatched = False
-                        break
-                if isMatched:
-                    ret_records.append(arg_record)
-            return ret_records
-        else:
-            return arg_records
+        if arg_records:
+            if filter:
+                for arg_record in arg_records:
+                    isMatched = True
+                    for k,v in filter.items():
+                        if not v.lower() in arg_record['data'][k].lower():
+                            isMatched = False
+                            break
+                    if isMatched:
+                        ret_records.append(arg_record)
+                return ret_records
+        return arg_records
 # ===================================================================================
     @mylogger.deco
     def SortRecords(self, arg_records, sort):
         ret_records = []
-        if sort:
-            # とりあえず古い順に重複をなくして並び変える
-            sortitems = [record['data'][sort] for record in arg_records]
-            sortitems = list(dict.fromkeys(sortitems))
-            for item in sortitems:
-                for arg_record in arg_records:
-                    if arg_record['data'][sort] == item:
-                        ret_records.append(arg_record)
-            return ret_records
-        else:
-            return arg_records
+        if arg_records:
+            if sort:
+                # とりあえず古い順に重複をなくして並び変える
+                sortitems = [record['data'][sort] for record in arg_records]
+                sortitems = list(dict.fromkeys(sortitems))
+                for item in sortitems:
+                    for arg_record in arg_records:
+                        if arg_record['data'][sort] == item:
+                            ret_records.append(arg_record)
+                return ret_records
+        return arg_records
 # ===================================================================================
     @mylogger.deco
     def ConvertLinesToRecordsSub(self, lines):
         records = []
-        index = 0
-        for line in lines:
-            line = line.replace("\n", "")
-            log = {}
-            for column in self.logcolumns:
-                try:
-                    log[column] = line.split("\t")[self.logcolumns.index(column)]
-                except:
-                    log[column] = ""
-            data = {}
-            for column in self.datacolumns:
-                try:
-                    data[column] = line.split("\t")[self.datacolumns.index(column) + len(self.logcolumns)]
-                except:
-                    data[column] = ""
-            records.append({'index':index, 'log':log, 'data':data})
-            index += 1
+        if lines:
+            index = 0
+            for line in lines:
+                line = line.replace("\n", "")
+                log = {}
+                for column in self.logcolumns:
+                    try:
+                        log[column] = line.split("\t")[self.logcolumns.index(column)]
+                    except:
+                        log[column] = ""
+                data = {}
+                for column in self.datacolumns:
+                    try:
+                        data[column] = line.split("\t")[self.datacolumns.index(column) + len(self.logcolumns)]
+                    except:
+                        data[column] = ""
+                records.append({'index':index, 'log':log, 'data':data})
+                index += 1
         return records
 # ===================================================================================
     @mylogger.deco
@@ -106,7 +107,10 @@ class MyRecordManager():
         records = self.ExtractRecordsByRow(records, row)
         records = self.FilterRecords(records, filter)
         records = self.SortRecords(records, sort)
-        return records
+        if records:
+            return records
+        else:
+            return [self.GetEmptyRecord()]
 # ===================================================================================
     @mylogger.deco
     def ConvertRecordsToLines(self, records):
