@@ -50,7 +50,6 @@ class WidgetFactory():
             combobox.place(relx=coordates['relx'], rely=coordates['rely'], relwidth=coordates['relw'], relheight=coordates['relh'])
             cls.GetInstance().widgets[id].append(combobox)
             ret['widgets'][item] = {'combobox':combobox, 'stringvar':v, 'coordates':coordates}
-        print(ret)
         return ret
 # ===================================================================================
     @classmethod
@@ -66,7 +65,6 @@ class WidgetFactory():
             label.place(relx=coordates['relx'], rely=coordates['rely'], relwidth=coordates['relw'], relheight=coordates['relh'])
             cls.GetInstance().widgets[id].append(label)
             ret['widgets'][item] = {'label':label, 'coordates':coordates}
-        print(ret)
         return ret
 # ===================================================================================
     @classmethod
