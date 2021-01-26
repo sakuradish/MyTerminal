@@ -1,5 +1,6 @@
 # ===================================================================================
 from MyLogger.MyLogger import mylogger
+mylogger = mylogger.GetInstance()
 # ===================================================================================
 import tkinter as tk
 import datetime
