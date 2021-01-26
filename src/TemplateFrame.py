@@ -127,19 +127,21 @@ class TemplateFrame(tk.Frame):
                     records.append(record)
                 self.mydata.ReplaceRecords(records)
         elif event.keysym == 'd':
-            length = len(self.mydata.GetRecords())
             self.viewerstart += 1
+            len_records = len(self.mydata.GetRecords())
+            len_widget = len(self.viewerfield)
             if self.viewerstart < 0:
                 self.viewerstart = 0
-            elif length <= self.viewerstart + 10:
-                self.viewerstart = length - 10
+            elif len_records <= self.viewerstart + len_widget:
+                self.viewerstart = len_records - len_widget
         elif event.keysym == 'u':
-            length = len(self.mydata.GetRecords())
             self.viewerstart -= 1
+            len_records = len(self.mydata.GetRecords())
+            len_widget = len(self.viewerfield)
             if self.viewerstart < 0:
                 self.viewerstart = 0
-            elif length <= self.viewerstart + 10:
-                self.viewerstart = length - 10
+            elif len_records <= self.viewerstart + len_widget:
+                self.viewerstart = len_records - len_widget
         self.UpdateStaticWidgetProperty()
         self.InitializeDynamicWidget()
 # ===================================================================================
