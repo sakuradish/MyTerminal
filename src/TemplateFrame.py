@@ -29,7 +29,7 @@ class TemplateFrame(tk.Frame):
 # ===================================================================================
     @mylogger.deco
     def InitializeStaticWidget(self):
-        columns = mydata.GetDataColumns()
+        columns = self.mydata.GetDataColumns()
         self.inputfield['label'] = WidgetFactory.Label(self, columns, 0,0,0.2,0.4)
         self.inputfield['combobox'] = WidgetFactory.Combobox(self, columns, 0.2,0,0.8,0.4)
         self.filterfield = WidgetFactory.Combobox(self, columns, 0,0.43,1,0.04, "ToRight")
@@ -50,11 +50,11 @@ class TemplateFrame(tk.Frame):
     @mylogger.deco
     def InitializeDynamicWidget(self):
         # get records
-        columns = mydata.GetDataColumns()
+        columns = self.mydata.GetDataColumns()
         filter = {}
         for column in columns:
             filter[column] = self.filterfield['widgets'][column]['combobox'].get()
-        records = mydata.GetRecords(filter=filter)
+        records = self.mydata.GetRecords(filter=filter)
         # destroy
         for key,field in self.viewerfield.items():
             WidgetFactory.Destroy(field['combobox']['id'])
@@ -75,18 +75,18 @@ class TemplateFrame(tk.Frame):
     @mylogger.deco
     def UpdateDynamicWidgetProperty(self):
         # get records
-        columns = mydata.GetDataColumns()
+        columns = self.mydata.GetDataColumns()
         filter = {}
         for column in columns:
             filter[column] = self.filterfield['widgets'][column]['combobox'].get()
-        records = mydata.GetRecords(filter=filter)
+        records = self.mydata.GetRecords(filter=filter)
         # update
         count = 0
         start = self.viewerstart
         end = start + len(self.viewerfield)
         for recordidx in range(start, end, 1):
             record = records[recordidx]
-            for column in mydata.GetDataColumns():
+            for column in self.mydata.GetDataColumns():
                 self.viewerfield[count]['combobox']['widgets'][column]['combobox'].set(record['data'][column])
             self.viewerfield[count]['label']['widgets']['index']['label'].configure(text=str(record['index']))
             count += 1
@@ -99,7 +99,7 @@ class TemplateFrame(tk.Frame):
     def OnKeyEvent(self, event):
         if event.keysym == 'Return':
             isInputFieldFocused = False
-            columns = mydata.GetDataColumns()
+            columns = self.mydata.GetDataColumns()
             for column in columns:
                 combobox = self.inputfield['combobox']['widgets'][column]['combobox']
                 if combobox == self.master.focus_get() and combobox.get() != "":
@@ -127,14 +127,14 @@ class TemplateFrame(tk.Frame):
                     records.append(record)
                 self.mydata.ReplaceRecords(records)
         elif event.keysym == 'd':
-            length = len(mydata.GetRecords())
+            length = len(self.mydata.GetRecords())
             self.viewerstart += 1
             if self.viewerstart < 0:
                 self.viewerstart = 0
             elif length <= self.viewerstart + 10:
                 self.viewerstart = length - 10
         elif event.keysym == 'u':
-            length = len(mydata.GetRecords())
+            length = len(self.mydata.GetRecords())
             self.viewerstart -= 1
             if self.viewerstart < 0:
                 self.viewerstart = 0
