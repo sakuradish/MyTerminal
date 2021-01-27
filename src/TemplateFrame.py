@@ -42,10 +42,11 @@ class TemplateFrame(tk.Frame):
             records = self.mydata.GetRecords()
             records = [record['data'][column] for record in records]
             records = list(dict.fromkeys(records))
+            self.inputfield['combobox']['widgets'][column]['combobox'].set("")
+            self.filterfield['widgets'][column]['combobox'].set("")
+            records.reverse() # 新しいものが選びやすいようにする。空白データがあると先にそこにフォーカスが行ってしまう。
             self.inputfield['combobox']['widgets'][column]['combobox'].configure(values=records)
-            self.inputfield['combobox']['widgets'][column]['combobox'].set(self.mydata.GetRecords(row=-1)[0]['data'][column])
             self.filterfield['widgets'][column]['combobox'].configure(values=records)
-            # self.filterfield[column]['combobox'].set(self.mydata.GetRecords(row=-1)['data'][column])
 # ===================================================================================
     @mylogger.deco
     def InitializeDynamicWidget(self):
@@ -81,15 +82,19 @@ class TemplateFrame(tk.Frame):
             filter[column] = self.filterfield['widgets'][column]['combobox'].get()
         records = self.mydata.GetRecords(filter=filter)
         # update
-        count = 0
+        row = 0
         start = self.viewerstart
         end = start + len(self.viewerfield)
         for recordidx in range(start, end, 1):
             record = records[recordidx]
             for column in self.mydata.GetDataColumns():
-                self.viewerfield[count]['combobox']['widgets'][column]['combobox'].set(record['data'][column])
-            self.viewerfield[count]['label']['widgets']['index']['label'].configure(text=str(record['index']))
-            count += 1
+                self.viewerfield[row]['combobox']['widgets'][column]['combobox'].set(record['data'][column])
+                values = [record['data'][column] for record in records]
+                values = list(dict.fromkeys(values))
+                values.reverse()
+                self.viewerfield[row]['combobox']['widgets'][column]['combobox'].configure(values=values)
+            self.viewerfield[row]['label']['widgets']['index']['label'].configure(text=str(record['index']))
+            row += 1
 # ===================================================================================
     @mylogger.deco
     def OnTick(self):
