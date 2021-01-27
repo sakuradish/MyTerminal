@@ -121,7 +121,7 @@ class MyRecordManager():
             line += "\t" + record['log']['weekday']
             line += "\t" + record['log']['time']
             for column in self.datacolumns:
-                line += "\t" + record['data'][column]
+                line += "\t" + record['data'][column].replace("\n","")
             line += "\n"
             lines.append(line)
         return lines

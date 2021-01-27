@@ -20,7 +20,7 @@ class TemplateFrame(tk.Frame):
     def __init__(self, master, mydata ,cnf={},**kw):
         super().__init__(master,cnf,**kw)
         self.mydata = mydata
-        self.inputfield = {'label':{}, 'combobox':{}}
+        self.inputfield = {}
         self.filterfield = {}
         self.viewerfield = {}
         self.viewerstart = 0
@@ -126,6 +126,8 @@ class TemplateFrame(tk.Frame):
                         record['data'][column] = self.viewerfield[i]['combobox']['widgets'][column]['combobox'].get()
                     records.append(record)
                 self.mydata.ReplaceRecords(records)
+            self.UpdateStaticWidgetProperty()
+            self.InitializeDynamicWidget()
         elif event.keysym == 'd':
             self.viewerstart += 1
             len_records = len(self.mydata.GetRecords())
@@ -134,6 +136,8 @@ class TemplateFrame(tk.Frame):
                 self.viewerstart = 0
             elif len_records <= self.viewerstart + len_widget:
                 self.viewerstart = len_records - len_widget
+            self.UpdateStaticWidgetProperty()
+            self.InitializeDynamicWidget()
         elif event.keysym == 'u':
             self.viewerstart -= 1
             len_records = len(self.mydata.GetRecords())
@@ -142,8 +146,8 @@ class TemplateFrame(tk.Frame):
                 self.viewerstart = 0
             elif len_records <= self.viewerstart + len_widget:
                 self.viewerstart = len_records - len_widget
-        self.UpdateStaticWidgetProperty()
-        self.InitializeDynamicWidget()
+            self.UpdateStaticWidgetProperty()
+            self.InitializeDynamicWidget()
 # ===================================================================================
 if __name__ == '__main__':
 
