@@ -1,29 +1,25 @@
 # ===================================================================================
 from MyLogger.MyLogger import mylogger
-mylogger = mylogger.GetInstance()
+mylogger = mylogger.GetInstance("DEBUG")
 # ===================================================================================
 import tkinter as tk
 import datetime
-# from tkinter import font
 from tkinter import ttk
-# from PIL import Image, ImageTk
-# import time
 import math
 # ===================================================================================
-class ComposeFrame(tk.Frame):
+class ComposeFrame(tk.Tk):
     @mylogger.deco
-    def __init__(self, master=None,cnf={},**kw):
-        super().__init__(master,cnf,**kw)
+    def __init__(self, **kw):
+        super().__init__(**kw)
         self.frames = []
         self.isKeyEventProcessing = False
         self.isMouseEventProcessing = False
-        self.master.bind("<Control-Key>", self.OnKeyEvent)
-        self.master.bind("<Button>", self.OnMouseEvent)
-        self.OnTick()
+        self.bind("<Control-Key>", self.OnKeyEvent)
+        self.bind("<Button>", self.OnMouseEvent)
 # ===================================================================================
     @mylogger.deco
     def AddFrame(self, frame, id, key=None, mouse=None, time=None):
-        button = tk.Button(self.master, text=id)
+        button = tk.Button(self, text=id)
         # button.state(['pressed'])
         button.bind("<Button-1>", self.toggleView)
         button.bind("<Return>", self.toggleView)
@@ -49,8 +45,10 @@ class ComposeFrame(tk.Frame):
         for frame in self.frames:
             if frame[2] == True:
                 visibleFrames.append(frame[0])
-        rowmax = 1
         # 行数,列数などを算出
+        if visibleFrames == []:
+            return
+        rowmax = 1
         while 1:
             if rowmax * rowmax > len(visibleFrames):
                 rowmax -= 1
@@ -126,16 +124,11 @@ class ComposeFrame(tk.Frame):
             if frame[6]:
                 frame[6]()
         # print(datetime.datetime(2021, 5, 5, 10,10,10) - datetime.datetime.now())
-        self.master.after(10000,self.OnTick)
+        self.after(10000,self.OnTick)
 # ===================================================================================
 if __name__ == '__main__':
-    # ウィンドウ作成
-    root = tk.Tk()
-    root.title("MyTerminal")
-    root.minsize(root.winfo_screenwidth(), root.winfo_screenheight())
-    root.state("zoomed")
 
-    framecompose = ComposeFrame(root)
+    framecompose = ComposeFrame()
     frame1 = tk.Frame(bg='#000000')
     frame2 = tk.Frame(bg='#0000ff')
     frame3 = tk.Frame(bg='#00ff00')
@@ -154,5 +147,5 @@ if __name__ == '__main__':
     framecompose.AddFrame(frame8, '#ffffff')
 
     # メインループ
-    root.mainloop()
+    framecompose.mainloop()
 # ===================================================================================
